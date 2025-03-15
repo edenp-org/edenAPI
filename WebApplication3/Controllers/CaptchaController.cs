@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication3.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("Captcha")]
     [ApiController]
     public class CaptchaController : Controller
     {
@@ -15,7 +15,7 @@ namespace WebApplication3.Controllers
             _captcha = captcha;
         }
 
-        [HttpGet]
+        [HttpGet("Captcha")]
         public Dictionary<string, object> Captcha()
         {
             try
@@ -27,8 +27,10 @@ namespace WebApplication3.Controllers
                 return new Dictionary<string, object>()
                 {
                     { "status", 200},
-                    { "CaptchaID",id },
-                    { "Base64", info.Base64 },
+                    {"data",new{
+                        CaptchaID=id,
+                        Base64=info.Base64,
+                    }},
                     { "message", "成功" }
                 };
             }
