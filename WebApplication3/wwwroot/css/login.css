@@ -1,0 +1,133 @@
+﻿html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #f0f0f0;
+    font-family: 'Roboto', sans-serif;
+    position: relative;
+}
+
+.login-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.move-up {
+    margin-top: -150px;
+}
+
+.form-group {
+    margin-bottom: 1rem; /* 调整输入框之间的间距 */
+    display: flex;
+    align-items: center;
+}
+
+    .form-group label {
+        margin-right: 5px; /* 调小标签和输入框之间的间距 */
+        min-width: 4.2rem; /* 设置标签的最小宽度 */
+    }
+
+.form-control {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1; /* 使输入框占据剩余空间 */
+    height: 38px; /* 设置输入框的高度 */
+}
+
+.btn-custom {
+    width: 100%;
+    height: 50px;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    background: linear-gradient(45deg, #007bff, #00d4ff);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+    .btn-custom:hover {
+        background: linear-gradient(45deg, #0056b3, #00a3cc);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+.captcha-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.captcha {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    padding: 0.5rem;
+    border-radius: 5px;
+}
+
+.captcha-input-container {
+    display: flex;
+    align-items: center;
+}
+
+    .captcha-input-container img {
+        margin-left: 10px;
+        cursor: pointer;
+        width: auto; /* 保持图片的纵横比 */
+        height: 38px; /* 设置验证码图片的高度，与输入框一致 */
+        border-radius: 15px; /* 设置验证码图片的圆角 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+    }
+
+.text-muted {
+    font-size: 0.9rem;
+}
+
+.card-header {
+    background: none;
+    color: #333;
+    border-radius: 15px 15px 0 0;
+    padding: 15px;
+}
+
+.card-footer {
+    background: none;
+    color: #333;
+    border-radius: 0 0 15px 15px;
+    padding: 15px;
+}
+
+    .card-footer a {
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+        .card-footer a:hover {
+            color: #0056b3;
+        }
+
+.background-rectangles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.rectangle {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}

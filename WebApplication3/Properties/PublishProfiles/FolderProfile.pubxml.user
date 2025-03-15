@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\31506\source\repos\WebApplication3\WebApplication3\bin\Release\net8.0\publish\</_PublishTargetUrl>
+    <History>True|2024-12-24T12:46:37.8111413Z||;True|2024-12-23T15:56:11.5558509+08:00||;True|2024-12-23T04:06:20.8842452+08:00||;True|2024-12-23T03:35:05.4680487+08:00||;True|2024-12-23T02:10:51.6789408+08:00||;True|2024-12-23T02:07:29.8139458+08:00||;True|2024-12-23T02:03:27.2972085+08:00||;True|2024-12-23T01:54:49.1878931+08:00||;True|2024-12-23T01:33:10.1755528+08:00||;True|2024-12-23T01:12:47.5803123+08:00||;True|2024-12-22T23:16:35.9844643+08:00||;True|2024-12-08T03:30:48.2305573+08:00||;True|2024-12-08T03:30:16.3652972+08:00||;True|2024-12-08T00:06:28.4884434+08:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="wwwroot/js/site.js">
+      <publishTime>12/07/2024 20:00:23</publishTime>
+    </File>
+  </ItemGroup>
+</Project>
