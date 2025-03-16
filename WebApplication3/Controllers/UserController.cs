@@ -60,8 +60,9 @@ namespace WebApplication3.Controllers
                 if (!data.TryGetValue("email", out var email)) throw new Exception("请输入邮箱！");
                 if (!data.TryGetValue("captchaId", out var captchaId)) throw new Exception("请输入验证码！");
                 if (!data.TryGetValue("captchaInput", out var captchaInput)) throw new Exception("请输入验证码！");
+                //if (!_captcha.Validate(captchaId, captchaInput)) throw new Exception("错误的验证码");
+
                 string token = new Random().Next(100000, 999999).ToString();
-               
                 //此处应该换成nosql数据库
                 UserTokenBiz userTokenBiz = new UserTokenBiz();
                 userTokenBiz.Add(new Models.DB.UserToken
@@ -110,17 +111,18 @@ namespace WebApplication3.Controllers
                 if (userToken == null) throw new Exception("验证码错误或已过期！");
 
                 string userCode = Guid.NewGuid().ToString();
+                string confuse = new Random().Next(100000, 999999).ToString("X2");
                 userBiz.Add(new Models.DB.User
                 {
                     Email = email,
                     Username = uname,
-                    Password = EncryptionHelper.ComputeSHA256(password),
+                    Password = EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(password) + confuse),
                     Code = userCode
                 });
 
 
                 dic.Add("status", 200);
-                dic.Add("message", "验证码已发送至邮箱，请查收！");
+                dic.Add("message", "注册成功！");
             }
             catch (Exception ex)
             {

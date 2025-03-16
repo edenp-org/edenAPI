@@ -32,5 +32,10 @@ namespace WebApplication3.Models.DB
         /// 用户代码
         /// </summary>
         public string Code { get; set; }
+
+        /// <summary>
+        /// 密码的混淆码（加盐值）
+        /// </summary>
+        public string Confuse { get; set; }
     }
 }
