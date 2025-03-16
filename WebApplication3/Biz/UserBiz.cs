@@ -22,9 +22,9 @@ namespace WebApplication3.Biz
             return dao.GetUserByEmail(email);
         }
 
-        public User GetUserByUnamen(string email)
+        public User GetUserByUname(string email)
         {
-            return dao.GetUserByUnamen(email);
+            return dao.GetUserByUname(email);
         }
 
         public bool UserExists(string email,string uname)

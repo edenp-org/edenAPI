@@ -37,5 +37,9 @@ namespace WebApplication3.Models.DB
         /// 密码的混淆码（加盐值）
         /// </summary>
         public string Confuse { get; set; }
+        /// <summary>
+        /// 用户角色
+        /// </summary>
+        public int Role { get; set; } 
     }
 }

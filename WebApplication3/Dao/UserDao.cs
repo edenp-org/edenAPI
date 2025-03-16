@@ -21,7 +21,7 @@ namespace WebApplication3.Dao
             return FreeSqlHelper.Instance.Select<Models.DB.User>().Where(u => u.Email == email).First();
         }
         
-        public User GetUserByUnamen(string username)
+        public User GetUserByUname(string username)
         {
             return FreeSqlHelper.Instance.Select<Models.DB.User>().Where(u => u.Username == username).First();
         }
