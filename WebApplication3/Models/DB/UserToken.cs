@@ -1,4 +1,6 @@
 ﻿using FreeSql.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 
 namespace WebApplication3.Models.DB
 {
@@ -23,13 +25,13 @@ namespace WebApplication3.Models.DB
         /// <summary>
         /// Token，不能为空
         /// </summary>
-        [Column(IsNullable = false)]
+        [Column( IsNullable = false),MaxLength(-1)]
         public string Token { get; set; }
 
         /// <summary>
         /// Token的作用，最大长度为256，不能为空
         /// </summary>
-        [Column(StringLength = 256, IsNullable = false)]
+        [Column(IsNullable = false)]
         public string Purpose { get; set; }
 
         /// <summary>

@@ -46,9 +46,11 @@ namespace WebApplication3.Controllers
                 if (string.IsNullOrEmpty(uname) && string.IsNullOrEmpty(email)) throw new Exception("请选择登录方式");
 
                 // 验证验证码
-                if (!_captcha.Validate(captchaId.ToString(), captchaCode.ToString())) throw new Exception("验证码错误！");
+                //if (!_captcha.Validate(captchaId.ToString(), captchaCode.ToString())) throw new Exception("验证码错误！");
 
                 UserBiz userBiz = new UserBiz();
+                UserTokenBiz userTokenBiz = new UserTokenBiz();
+
                 User user = null;
                 if (!string.IsNullOrEmpty(email))
                     user = userBiz.GetUserByEmail(email);
@@ -58,6 +60,16 @@ namespace WebApplication3.Controllers
                 if(user == null) throw new Exception("用户名或邮箱或密码不存在！");
                 if (!user.Password.Equals(EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(password) + user.Confuse))) throw new Exception("用户名或邮箱或密码不存在！");
                 string token = TokenService.GenerateToken(user.Username, user.Role.ToString(), "登录");
+
+
+                userTokenBiz.Add(new UserToken
+                {
+                    Expiration = DateTime.Now.AddHours(ConfigHelper.GetInt("TokenExpirationHours")),
+                    CreatedAt = DateTime.Now,
+                    Purpose = "登录",
+                    Token = token,
+                    Username = user.Username
+                });
 
                 dic.Add("status", 200);
                 dic.Add("message", "登录成功！");

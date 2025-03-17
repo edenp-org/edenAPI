@@ -2,6 +2,7 @@ using FreeSql;
 using Lazy.Captcha.Core.Generator;
 using Lazy.Captcha.Core;
 using WebApplication3.Foundation.Helper;
+using Microsoft.Extensions.FileProviders;
 
 namespace WebApplication3
 {
@@ -24,11 +25,8 @@ namespace WebApplication3
                               .AllowAnyMethod();
                     });
             });
-            // 配置 FreeSql
-            //builder.Services.AddSingleton<IFreeSql>(new FreeSqlBuilder()
-            //    .UseConnectionString(DataType.SqlServer, builder.Configuration.GetConnectionString("DefaultConnection"))
-            //    .UseAutoSyncStructure(true) // 自动同步实体结构到数据库
-            //    .Build());
+
+
             builder.Services.AddCaptcha(builder.Configuration, option =>
             {
                 option.CaptchaType = CaptchaType.NUMBER; // 验证码类型
