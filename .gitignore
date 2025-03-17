@@ -52,5 +52,9 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+#无需提交
+WebApplication3/wwwroot/Work/
+
 # VS
 .vs/

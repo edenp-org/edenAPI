@@ -21,7 +21,9 @@ namespace WebApplication3.Models.DB
         {
             return FreeSqlHelper.Instance
                 .Select<UserToken>()
-                .Where(t => t.Username.Equals(uname) &&t.Token.Equals(Token) &&t.Purpose.Equals(Purpose) &&t.Expiration >= DateTime.Now)
+                .Where(t => t.Username.Equals(uname) &&t.Purpose.Equals(Purpose) &&t.Expiration >= DateTime.Now)
+                .ToList()
+                .Where(t=>t.Token.Equals(Token))
                 .Any();
         }
 
