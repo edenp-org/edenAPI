@@ -15,5 +15,10 @@ namespace WebApplication3.Biz
         {
            return dao.GetTokenByUserAndPurpose(user, Purpose);
         }
+
+        public bool IsExist(string uname,string Token, string Purpose) 
+        {
+            return dao.IsExist(uname, Token, Purpose);
+        }
     }
 }
