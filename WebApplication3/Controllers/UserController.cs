@@ -46,7 +46,7 @@ namespace WebApplication3.Controllers
                 if (string.IsNullOrEmpty(uname) && string.IsNullOrEmpty(email)) throw new Exception("请选择登录方式");
 
                 // 验证验证码
-                //if (!_captcha.Validate(captchaId.ToString(), captchaCode.ToString())) throw new Exception("验证码错误！");
+                if (!_captcha.Validate(captchaId.ToString(), captchaCode.ToString())) throw new Exception("验证码错误！");
 
                 UserBiz userBiz = new UserBiz();
                 UserTokenBiz userTokenBiz = new UserTokenBiz();
