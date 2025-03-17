@@ -17,5 +17,14 @@ namespace WebApplication3.Models.DB
                  .ToList();
         }
 
+        public bool IsExist(string uname, string Token, string Purpose)
+        {
+            return FreeSqlHelper.Instance
+                .Select<UserToken>()
+                .Where(t => t.Username.Equals(uname) &&t.Token.Equals(Token) &&t.Purpose.Equals(Purpose) &&t.Expiration >= DateTime.Now)
+                .Any();
+        }
+
+
     }
 }
