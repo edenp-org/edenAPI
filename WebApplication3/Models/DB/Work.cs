@@ -39,5 +39,8 @@ namespace WebApplication3.Models.DB
         /// 作者ID，外键，关联用户表
         /// </summary>
         public string AuthorId { get; set; }
+
+        public string AuthorName { get; set; }
+        public string Tags { get; set; }
     }
 }

@@ -24,27 +24,35 @@ namespace WebApplication3.Controllers
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try
             {
-                if (!pairs.TryGetValue("data", out object dataObj)) throw new Exception("没有入参！");
-                var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
-                if (!data.TryGetValue("title", out string title)) throw new Exception("请输入标题！");
-                if (!data.TryGetValue("description", out string description)) throw new Exception("请输入介绍！");
-                if (!data.TryGetValue("content", out string content)) throw new Exception("请输入内容！");
+                if (!pairs.TryGetValue("data", out object dataObj)  || string.IsNullOrEmpty(dataObj.ToString())) throw new Exception("没有入参！");
+                var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
+                if (!data.TryGetValue("title", out object title) || string.IsNullOrEmpty(title.ToString())) throw new Exception("请输入标题！");
+                if (!data.TryGetValue("description", out object description) || string.IsNullOrEmpty(description.ToString())) throw new Exception("请输入介绍！");
+                if (!data.TryGetValue("content", out object content) || string.IsNullOrEmpty(content.ToString())) throw new Exception("请输入内容！");
+                if (!data.TryGetValue("Tags", out object tags) || string.IsNullOrEmpty(tags.ToString())) throw new Exception("没有标签！");
 
                 var userId = HttpContext.Items["UserId"]?.ToString();
+                var Uname = HttpContext.Items["Uname"]?.ToString();
                 if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
 
+                var tagList = tags.ToString().FromJsonString<List<string>>();
+
+                UserBiz userBiz = new UserBiz();
                 WorkBiz workBiz = new WorkBiz();
+                var user = userBiz.GetUserByCode(Uname);
                 var work = workBiz.AddWork(new Work
                 {
-                    Title = title,
-                    Description = description,
+                    Title = title.ToString(),
+                    Description = description.ToString(),
                     AuthorId = userId,
                     CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    UpdatedAt = DateTime.Now,
+                    AuthorName = user.Username,
+                    Tags =  tagList.ToJsonString()
                 });
                 string root = Path.Combine(_env.WebRootPath, "Work", userId);
                 if (!Directory.Exists(root)) Directory.CreateDirectory(root);
-                System.IO.File.WriteAllText(Path.Combine(root, work.Id + ".TXT"), content);
+                System.IO.File.WriteAllText(Path.Combine(root, work.Id + ".TXT"), content.ToString());
 
                 dic.Add("status", 200);
                 dic.Add("message", "成功");

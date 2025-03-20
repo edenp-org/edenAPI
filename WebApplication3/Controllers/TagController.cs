@@ -22,7 +22,7 @@ namespace WebApplication3.Controllers
 
                 TagBiz tagBiz = new TagBiz();
                 tagBiz.AddTag(new Tag() {
-                    CreatedAt = System.DateTime.Now,
+                    CreatedAt = DateTime.Now,
                     Name = data["Name"],
                     Description = data["Description"]
                 });
