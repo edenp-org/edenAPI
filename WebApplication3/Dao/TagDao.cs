@@ -28,6 +28,18 @@ namespace WebApplication3.Dao
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Name.Contains(name)).ToList();
         }
 
-
+        public void AddWorkAndTag(List<int> tagId, int workId)
+        {
+            List<WorkAndTag> workAndTags = new List<WorkAndTag>();
+            foreach (var item in tagId)
+            {
+                workAndTags.Add(new WorkAndTag
+                {
+                    TagId = item,
+                    WorkId = workId
+                });
+            }
+            FreeSqlHelper.Instance.Insert(workAndTags).ExecuteAffrows();
+        }   
     }
 }

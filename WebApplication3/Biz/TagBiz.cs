@@ -26,5 +26,10 @@ namespace WebApplication3.Biz
         {
             return tagDao.GetTagByFuzzyName(name);
         }
+        public void AddWorkAndTag(List<int> tagId, int workId)
+        {
+            tagDao.AddWorkAndTag(tagId, workId);
+        }
+
     }
 }

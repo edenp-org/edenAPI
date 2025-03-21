@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Concurrent;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
@@ -36,7 +37,19 @@ namespace WebApplication3.Controllers
                 if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
 
                 var tagList = tags.ToString().FromJsonString<List<string>>();
+                TagBiz tagBiz = new TagBiz();
 
+                ConcurrentBag<int> tagIds = new ConcurrentBag<int>();
+                
+                 
+                tagList.ForEach(tagName =>
+                {
+                    if (string.IsNullOrEmpty(tagName)) throw new Exception("标签不能为空！");
+
+                    var tag = tagBiz.GetTagByName(tagName);
+                    if (tag == null) throw new Exception($"{tagName}不存在！");
+                    tagIds.Add(tag.Id);
+                });
                 UserBiz userBiz = new UserBiz();
                 WorkBiz workBiz = new WorkBiz();
                 var user = userBiz.GetUserByCode(Uname);
@@ -50,6 +63,8 @@ namespace WebApplication3.Controllers
                     AuthorName = user.Username,
                     Tags =  tagList.ToJsonString()
                 });
+                tagBiz.AddWorkAndTag(tagIds.ToList(), work.Id);
+
                 string root = Path.Combine(_env.WebRootPath, "Work", userId);
                 if (!Directory.Exists(root)) Directory.CreateDirectory(root);
                 System.IO.File.WriteAllText(Path.Combine(root, work.Id + ".TXT"), content.ToString());
