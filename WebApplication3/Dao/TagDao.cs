@@ -5,9 +5,10 @@ namespace WebApplication3.Dao
 {
     public class TagDao
     {
-        public void AddTag(Tag tag) 
+        public Tag AddTag(Tag tag) 
         {
-             FreeSqlHelper.Instance.Insert(tag).ExecuteAffrows();
+            tag.Id = FreeSqlHelper.Instance.Insert(tag).ExecuteIdentity();
+            return tag;
         }
         public Tag GetTagById(int id)
         {
@@ -28,7 +29,7 @@ namespace WebApplication3.Dao
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Name.Contains(name)).ToList();
         }
 
-        public void AddWorkAndTag(List<int> tagId, int workId)
+        public void AddWorkAndTag(List<long> tagId, long workId)
         {
             List<WorkAndTag> workAndTags = new List<WorkAndTag>();
             foreach (var item in tagId)

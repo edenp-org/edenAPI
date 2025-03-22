@@ -7,9 +7,9 @@ namespace WebApplication3.Biz
     public class TagBiz
     {
         TagDao tagDao = new TagDao();
-        public void AddTag(Tag tag)
+        public Tag AddTag(Tag tag)
         {
-            tagDao.AddTag(tag);
+            return tagDao.AddTag(tag);
         }
 
         public Tag GetTagById(int id)
@@ -26,7 +26,7 @@ namespace WebApplication3.Biz
         {
             return tagDao.GetTagByFuzzyName(name);
         }
-        public void AddWorkAndTag(List<int> tagId, int workId)
+        public void AddWorkAndTag(List<long> tagId, long workId)
         {
             tagDao.AddWorkAndTag(tagId, workId);
         }

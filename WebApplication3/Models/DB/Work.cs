@@ -8,7 +8,7 @@ namespace WebApplication3.Models.DB
         /// 作品ID，主键，自增
         /// </summary>
         [Column(IsIdentity = true, IsPrimary = true)]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// 作品标题
@@ -41,6 +41,7 @@ namespace WebApplication3.Models.DB
         public string AuthorId { get; set; }
 
         public string AuthorName { get; set; }
+
         public string Tags { get; set; }
     }
 }

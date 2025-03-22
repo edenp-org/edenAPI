@@ -38,21 +38,19 @@ namespace WebApplication3.Controllers
 
                 var tagList = tags.ToString().FromJsonString<List<string>>();
                 TagBiz tagBiz = new TagBiz();
-
-                ConcurrentBag<int> tagIds = new ConcurrentBag<int>();
+                ConcurrentBag<long> tagIds = new ConcurrentBag<long>();
                 
-                 
                 tagList.ForEach(tagName =>
                 {
                     if (string.IsNullOrEmpty(tagName)) throw new Exception("标签不能为空！");
 
                     var tag = tagBiz.GetTagByName(tagName);
-                    if (tag == null) throw new Exception($"{tagName}不存在！");
+                    if (tag == null) throw new Exception($"标签“{tagName}”不存在！");
                     tagIds.Add(tag.Id);
                 });
                 UserBiz userBiz = new UserBiz();
                 WorkBiz workBiz = new WorkBiz();
-                var user = userBiz.GetUserByCode(Uname);
+                var user = userBiz.GetUserByUname(Uname);
                 var work = workBiz.AddWork(new Work
                 {
                     Title = title.ToString(),
@@ -70,7 +68,7 @@ namespace WebApplication3.Controllers
                 System.IO.File.WriteAllText(Path.Combine(root, work.Id + ".TXT"), content.ToString());
 
                 dic.Add("status", 200);
-                dic.Add("message", "成功");
+                dic.Add("message", "成功");                
             }
             catch (Exception ex)
             {

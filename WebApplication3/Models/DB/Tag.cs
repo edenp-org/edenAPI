@@ -11,7 +11,7 @@ namespace WebApplication3.Models.DB
         /// 标签ID，主键，自增
         /// </summary>
         [Column(IsIdentity = true, IsPrimary = true)]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// 标签名称
@@ -19,13 +19,13 @@ namespace WebApplication3.Models.DB
         public string Name { get; set; }
 
         /// <summary>
-        /// 标签描述
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
         /// 创建时间
         /// </summary>
         public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// 创建者ID
+        /// </summary>
+        public int UId { get; set; }
     }
 }
