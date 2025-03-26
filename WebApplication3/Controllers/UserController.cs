@@ -100,7 +100,7 @@ namespace WebApplication3.Controllers
                 if (!data.TryGetValue("email", out var email)) throw new Exception("请输入邮箱！");
                 if (!data.TryGetValue("captchaId", out var captchaId)) throw new Exception("请输入验证码ID！");
                 if (!data.TryGetValue("captchaInput", out var captchaInput)) throw new Exception("请输入验证码！");
-                // if (!_captcha.Validate(captchaId, captchaInput)) throw new Exception("错误的验证码");
+                if (!_captcha.Validate(captchaId, captchaInput)) throw new Exception("错误的验证码");
 
                 // 生成验证码
                 var token = new Random().Next(100000, 999999).ToString();

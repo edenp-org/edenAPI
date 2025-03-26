@@ -42,11 +42,11 @@ namespace WebApplication3.Biz
             var maxCodeUser = GetMaxCodeUser();
             if (maxCodeUser != null && int.TryParse(maxCodeUser.Code, out int maxCode))
             {
-                return (maxCode + 1).ToString("D8"); // 生成新的 Code，格式为8位数字
+                return (maxCode + 1).ToString(); // 生成新的 Code，格式为8位数字
             }
             else
             {
-                return "00000001"; // 如果没有用户，初始化为00000001
+                return "1"; // 如果没有用户，初始化为00000001
             }
 
         }

@@ -113,7 +113,7 @@ namespace WebApplication3.Controllers
             try
             {
                 var workBiz = new WorkBiz();
-                var work = workBiz.GetWorkByGetWorkId(workId);
+                var work = workBiz.GetWorkByGetWorkCode(workId);
                 if (work == null) throw new Exception("未查询到数据！");
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
