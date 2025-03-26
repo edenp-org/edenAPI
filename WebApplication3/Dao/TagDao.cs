@@ -5,13 +5,14 @@ namespace WebApplication3.Dao
 {
     public class TagDao
     {
-        public void AddTag(Tag tag) 
+        public Tag AddTag(Tag tag) 
         {
-             FreeSqlHelper.Instance.Insert(tag).ExecuteAffrows();
+            tag.Id = FreeSqlHelper.Instance.Insert(tag).ExecuteIdentity();
+            return tag;
         }
-        public Tag GetTagById(int id)
+        public Tag GetTagByCode(string code)
         {
-            return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Id == id).ToOne();
+            return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Code == code).ToOne();
         }
 
         public Tag GetTagByName(string name)
@@ -28,6 +29,30 @@ namespace WebApplication3.Dao
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Name.Contains(name)).ToList();
         }
 
+        public void AddWorkAndTag(List<string> tagId, string workId)
+        {
+            List<WorkAndTag> workAndTags = new List<WorkAndTag>();
+            foreach (var item in tagId)
+            {
+                workAndTags.Add(new WorkAndTag
+                {
+                    TagId = item,
+                    WorkId = workId
+                });
+            }
+            FreeSqlHelper.Instance.Insert(workAndTags).ExecuteAffrows();
+        }
 
+        public Tag GetMaxCodeTag()
+        {
+            return FreeSqlHelper.Instance.Select<Tag>()
+                .OrderByDescending(t => Convert.ToInt32(t.Code))
+                .First();
+        }
+
+        public bool TagCodeExists(string code)
+        {
+            return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Code == code).Any();
+        }
     }
 }

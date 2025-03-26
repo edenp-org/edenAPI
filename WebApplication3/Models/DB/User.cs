@@ -5,6 +5,7 @@ namespace WebApplication3.Models.DB
     /// <summary>
     /// 用户类，表示数据库中的用户表
     /// </summary>
+    [Index("uk_code", "Code", true)]
     public class User
     {
         /// <summary>

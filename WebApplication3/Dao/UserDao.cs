@@ -30,5 +30,11 @@ namespace WebApplication3.Dao
         {
             return FreeSqlHelper.Instance.Select<Models.DB.User>().Where(u => u.Email == email || u.Username == uname).Any();
         }
+        public User GetMaxCodeUser()
+        {
+            return FreeSqlHelper.Instance.Select<Models.DB.User>()
+                .OrderByDescending(u => Convert.ToInt32(u.Code))
+                .First();
+        }
     }
 }
