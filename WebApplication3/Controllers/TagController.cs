@@ -13,27 +13,44 @@ namespace WebApplication3.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
+        // 用于确保线程安全的锁对象
+        private static readonly object _lock = new object();
 
+        /// <summary>
+        /// 添加标签
+        /// </summary>
+        /// <param name="pairs">包含标签信息的字典</param>
+        /// <returns>包含操作结果的字典</returns>
         [Authorize(false), HttpPost("AddTag")]
-        public Dictionary<string, object> AddTag(Dictionary<string,object> pairs)
+        public Dictionary<string, object> AddTag(Dictionary<string, object> pairs)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try
             {
+                // 检查输入参数
                 if (!pairs.TryGetValue("data", out object dataObj)) throw new Exception("没有入参！");
                 var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
                 if (!data.TryGetValue("Name", out string Name)) throw new Exception("没有Tag名");
                 var userId = HttpContext.Items["UserId"]?.ToString();
 
                 TagBiz tagBiz = new TagBiz();
+                // 检查标签是否已存在
                 if (tagBiz.GetTagByName(Name) != null) throw new Exception("该Tag已存在");
-                var tag = tagBiz.AddTag(new Tag()
+
+                Tag tag;
+                // 使用锁确保线程安全
+                lock (_lock)
                 {
-                    CreatedAt = DateTime.Now,
-                    Name = Name,
-                    UId = int.Parse(userId)
-                    //Description = data["Description"]
-                });
+                    tag = new Tag()
+                    {
+                        CreatedAt = DateTime.Now,
+                        Name = Name,
+                        UId = int.Parse(userId),
+                        Code = tagBiz.GetNewTagCode()
+                    };
+                    tag = tagBiz.AddTag(tag);
+                }
+
                 dic.Add("data", tag);
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
@@ -46,16 +63,23 @@ namespace WebApplication3.Controllers
             return dic;
         }
 
-        public Dictionary<string, object> GetTag(string name,int id = 0) 
+        /// <summary>
+        /// 获取标签
+        /// </summary>
+        /// <param name="name">标签名称</param>
+        /// <param name="code">标签代码</param>
+        /// <returns>包含操作结果的字典</returns>
+        public Dictionary<string, object> GetTag(string name, string code = "0")
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
-            try 
+            try
             {
                 TagBiz tagBiz = new TagBiz();
                 List<Tag> tag = new List<Tag>();
-                if (id == 0)
+                // 根据代码或名称获取标签
+                if (!string.IsNullOrEmpty(code))
                 {
-                    tag.Add(tagBiz.GetTagById(id));
+                    tag.Add(tagBiz.GetTagByCode(code));
                 }
                 else
                 {
@@ -70,7 +94,7 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 400);
                 dic.Add("message", e.Message);
             }
-            return dic;  
+            return dic;
         }
     }
 }

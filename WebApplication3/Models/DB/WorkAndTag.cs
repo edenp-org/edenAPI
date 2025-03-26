@@ -2,7 +2,7 @@
 {
     public class WorkAndTag
     {
-        public long WorkId { get; set; }
-        public long TagId { get; set; }
+        public string WorkId { get; set; }
+        public string TagId { get; set; }
     }
 }

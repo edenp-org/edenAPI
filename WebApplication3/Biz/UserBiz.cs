@@ -30,7 +30,26 @@ namespace WebApplication3.Biz
         public bool UserExists(string email,string uname)
         {
             return dao.UserExists(email, uname);
-        }   
+        }
+        public User GetMaxCodeUser()
+        {
+            return dao.GetMaxCodeUser();
+        }
+
+        public string GetNewCode() 
+        {
+            // 查询当前数据库中最大的 Code
+            var maxCodeUser = GetMaxCodeUser();
+            if (maxCodeUser != null && int.TryParse(maxCodeUser.Code, out int maxCode))
+            {
+                return (maxCode + 1).ToString("D8"); // 生成新的 Code，格式为8位数字
+            }
+            else
+            {
+                return "00000001"; // 如果没有用户，初始化为00000001
+            }
+
+        }
 
     }
 }

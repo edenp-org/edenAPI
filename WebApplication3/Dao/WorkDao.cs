@@ -11,6 +11,17 @@ namespace WebApplication3.Dao
             work.Id = (int)insertedId;
             return work;
         }
-        
+
+        public Work GetWorkByGetWorkId(string code)
+        {
+           return  FreeSqlHelper.Instance.Select<Work>().Where(w=>w.Code == id).First();
+        }
+        public Work GetMaxCodeWork()
+        {
+            return FreeSqlHelper.Instance.Select<Work>()
+                .OrderByDescending(w => Convert.ToInt32(w.Code))
+                .First();
+        }
+
     }
 }

@@ -2,6 +2,7 @@
 
 namespace WebApplication3.Models.DB
 {
+    [Index("uk_code", "Code", true)]
     public class Work
     {
         /// <summary>
@@ -38,10 +39,11 @@ namespace WebApplication3.Models.DB
         /// <summary>
         /// 作者ID，外键，关联用户表
         /// </summary>
-        public string AuthorId { get; set; }
+        public string AuthorCode { get; set; }
 
         public string AuthorName { get; set; }
 
         public string Tags { get; set; }
+        public string Code { get; set; }
     }
 }

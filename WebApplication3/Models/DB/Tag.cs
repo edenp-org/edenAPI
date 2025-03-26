@@ -27,5 +27,7 @@ namespace WebApplication3.Models.DB
         /// 创建者ID
         /// </summary>
         public int UId { get; set; }
+
+        public string Code { get; set; }
     }
 }

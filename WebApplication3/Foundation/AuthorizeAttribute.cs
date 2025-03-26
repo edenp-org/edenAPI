@@ -32,7 +32,7 @@ namespace WebApplication3.Foundation
             // 将用户ID存储在HttpContext.Items中
             context.HttpContext.Items["UserId"] = user.Id;
             context.HttpContext.Items["Uname"] = user.Username;
-
+            context.HttpContext.Items["Code"] = user.Code;
             UserTokenBiz tokenBiz = new UserTokenBiz();
             if (!tokenBiz.IsExist(role.Value, token, "登录")) throw new Exception("鉴权失败！");
 
