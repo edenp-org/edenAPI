@@ -69,7 +69,8 @@ namespace WebApplication3.Controllers
         /// <param name="name">标签名称</param>
         /// <param name="code">标签代码</param>
         /// <returns>包含操作结果的字典</returns>
-        public Dictionary<string, object> GetTag(string name, string code = "0")
+        [HttpGet("GetTag")]
+        public Dictionary<string, object> GetTag(string name="", string code = "")
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try
@@ -87,7 +88,7 @@ namespace WebApplication3.Controllers
                 }
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
-                dic.Add("data", tag);
+                dic.Add("data", tag.Select(a => new { a.Code, a.Name, a.CreatedAt }));
             }
             catch (Exception e)
             {
