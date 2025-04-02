@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using TouchSocket.Core;
 using WebApplication3.Biz;
+using WebApplication3.Foundation;
 using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 using WebApplication3.Sundry;
@@ -25,10 +26,10 @@ namespace WebApplication3.Controllers
         }
 
         /// <summary>
-        /// 登录
+        /// 用户登录
         /// </summary>
-        /// <param name="pairs">入参</param>
-        /// <returns>返回登录结果</returns>
+        /// <param name="pairs">包含用户名/邮箱、密码、验证码等信息的字典</param>
+        /// <returns>返回登录结果，包括状态码和消息</returns>
         [HttpPost("Login")]
         public Dictionary<string, object> Login([FromBody] Dictionary<string, object> pairs)
         {
@@ -84,10 +85,10 @@ namespace WebApplication3.Controllers
         }
 
         /// <summary>
-        /// 获取邮箱验证码
+        /// 发送邮箱验证码
         /// </summary>
-        /// <param name="pairs">入参</param>
-        /// <returns>返回发送结果</returns>
+        /// <param name="pairs">包含邮箱和验证码信息的字典</param>
+        /// <returns>返回发送结果，包括状态码和消息</returns>
         [HttpPost("SendEmailVerificationCode")]
         public Dictionary<string, object> SendEmailVerificationCode([FromBody] Dictionary<string, object> pairs)
         {
@@ -131,10 +132,10 @@ namespace WebApplication3.Controllers
         }
 
         /// <summary>
-        /// 注册
+        /// 用户注册
         /// </summary>
-        /// <param name="pairs">入参</param>
-        /// <returns>返回注册结果</returns>
+        /// <param name="pairs">包含邮箱、用户名、密码、验证码等信息的字典</param>
+        /// <returns>返回注册结果，包括状态码和消息</returns>
         [HttpPost("Register")]
         public Dictionary<string, object> Register([FromBody] Dictionary<string, object> pairs)
         {
@@ -181,6 +182,89 @@ namespace WebApplication3.Controllers
 
                 dic.Add("status", 200);
                 dic.Add("message", "注册成功！");
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// 添加用户喜欢的标签
+        /// </summary>
+        /// <param name="pairs">包含标签信息的字典</param>
+        /// <returns>返回操作结果，包括状态码和消息</returns>
+        [Authorize(false), HttpPost("AddUsersLikeTag")]
+        public Dictionary<string, object> AddUsersLikeTag([FromBody] Dictionary<string, object> pairs)
+        {
+            var dic = new Dictionary<string, object>();
+            try
+            {
+                if (!pairs.TryGetValue("data", out var dataObj)) throw new Exception("未获取到数据！");
+                var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
+                if (!data.TryGetValue("TagCode", out var TagCode)) throw new Exception("缺少入参Tag！");
+                // 获取用户信息
+                var userId = HttpContext.Items["UserId"]?.ToString();
+                var Uname = HttpContext.Items["Uname"]?.ToString();
+                var UCode = HttpContext.Items["Code"]?.ToString();
+                if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
+
+                if (string.IsNullOrEmpty(TagCode)) throw new Exception("标签不能为空！");
+                if (new TagBiz().GetTagByCode(TagCode) == null) throw new Exception("标签不存在！");
+                if (new UserBiz().GetUserByCode(UCode) == null) throw new Exception("用户不存在！");
+
+                UserBiz userBiz = new UserBiz();
+                var userFavoriteTags = userBiz.GetUserFavoriteTagByUserId(UCode);
+                userBiz.AddUserFavoriteTag(new UserFavoriteTag
+                {
+                    TagCode = TagCode,
+                    UserCode = UCode
+                });
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// 添加用户讨厌的标签
+        /// </summary>
+        /// <param name="pairs">包含标签信息的字典</param>
+        /// <returns>返回操作结果，包括状态码和消息</returns>
+        [Authorize(false), HttpPost("AddUserDislikedTag")]
+        public Dictionary<string, object> AddUserDislikedTag([FromBody] Dictionary<string, object> pairs)
+        {
+            var dic = new Dictionary<string, object>();
+            try
+            {
+                if (!pairs.TryGetValue("data", out var dataObj)) throw new Exception("未获取到数据！");
+                var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
+                if (!data.TryGetValue("TagCode", out var TagCode)) throw new Exception("缺少入参Tag！");
+                // 获取用户信息
+                var userId = HttpContext.Items["UserId"]?.ToString();
+                var Uname = HttpContext.Items["Uname"]?.ToString();
+                var UCode = HttpContext.Items["Code"]?.ToString();
+                if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
+                if (string.IsNullOrEmpty(TagCode)) throw new Exception("标签不能为空！");
+                if (new TagBiz().GetTagByCode(TagCode) == null) throw new Exception("标签不存在！");
+                if (new UserBiz().GetUserByCode(UCode) == null) throw new Exception("用户不存在！");
+
+                UserBiz userBiz = new UserBiz();
+                var userDislikedTags = userBiz.GetUserDislikedTagByUserId(UCode);
+                userBiz.AddUserDislikedTag(new UserDislikedTag
+                {
+                    TagCode = TagCode,
+                    UserCode = UCode
+                });
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
             }
             catch (Exception ex)
             {

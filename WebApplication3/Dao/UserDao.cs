@@ -36,5 +36,22 @@ namespace WebApplication3.Dao
                 .OrderByDescending(u => Convert.ToInt32(u.Code))
                 .First();
         }
+        public void AddUserFavoriteTag(UserFavoriteTag userFavorite) 
+        {
+            FreeSqlHelper.Instance.Insert(userFavorite).ExecuteAffrows();
+        }
+        public List<UserFavoriteTag> GetUserFavoriteTagByUserId(string userId)
+        {
+            return FreeSqlHelper.Instance.Select<UserFavoriteTag>().Where(u => u.UserCode == userId).ToList();
+        }
+        public void AddUserDislikedTag(UserDislikedTag userDislikedTag) 
+        {
+            FreeSqlHelper.Instance.Insert(userDislikedTag).ExecuteAffrows();
+        }
+        public List<UserDislikedTag> GetUserDislikedTagByUserId(string userId)
+        {
+            return FreeSqlHelper.Instance.Select<UserDislikedTag>().Where(u => u.UserCode == userId).ToList();
+        }
+
     }
 }

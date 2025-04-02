@@ -1,4 +1,5 @@
 ﻿using WebApplication3.Dao;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
 namespace WebApplication3.Biz
@@ -50,6 +51,25 @@ namespace WebApplication3.Biz
             }
 
         }
+        public void AddUserFavoriteTag(UserFavoriteTag userFavorite)
+        {
+            dao.AddUserFavoriteTag(userFavorite);
+        }
+
+        public List<UserFavoriteTag> GetUserFavoriteTagByUserId(string userId)
+        {
+            return dao.GetUserFavoriteTagByUserId(userId);
+        }
+
+        public void AddUserDislikedTag(UserDislikedTag userDislikedTag)
+        {
+            dao.AddUserDislikedTag(userDislikedTag);
+        }
+        public List<UserDislikedTag> GetUserDislikedTagByUserId(string userId)
+        {
+            return dao.GetUserDislikedTagByUserId(userId);
+        }
+
 
     }
 }

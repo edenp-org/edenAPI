@@ -27,7 +27,7 @@ namespace WebApplication3.Dao
         public List<Tag> GetTagByFuzzyName(string name)
         {
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Name.Contains(name)).ToList();
-        }
+         }
 
         public void AddWorkAndTag(List<string> tagId, string workId)
         {
