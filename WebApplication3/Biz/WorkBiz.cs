@@ -11,7 +11,7 @@ namespace WebApplication3.Biz
         {
             return workDao.AddWork(work);
         }
-        public Work GetWorkByGetWorkCode(string code) 
+        public Work GetWorkByGetWorkCode(long code) 
         {
             return workDao.GetWorkByGetWorkCode(code);
         }
@@ -20,16 +20,17 @@ namespace WebApplication3.Biz
             return workDao.GetMaxCodeWork();
         }
 
-        public string GetNewWorkCode()
+        public long GetNewWorkCode()
         {
             var maxCodeWork = GetMaxCodeWork();
-            if (maxCodeWork != null && int.TryParse(maxCodeWork.Code, out int maxCode))
+            long maxCode = 0;
+            if (maxCodeWork != null && maxCodeWork.Code != 0)
             {
-                return (maxCode + 1).ToString(); // 生成新的 Code，格式为8位数字
+                return (maxCode + 1); // 生成新的 Code，格式为8位数字
             }
             else
             {
-                return "1"; // 如果没有作品，初始化为00000001
+                return 1; // 如果没有作品，初始化为00000001
             }
         }
     }

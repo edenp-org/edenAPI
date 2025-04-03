@@ -11,7 +11,7 @@ namespace WebApplication3.Dao
             FreeSqlHelper.Instance.Insert(user).ExecuteAffrows();
         }
 
-        public User GetUserByCode(string code)
+        public User GetUserByCode(long code)
         {
             return FreeSqlHelper.Instance.Select<Models.DB.User>().Where(u => u.Code == code).First();
         }
@@ -40,7 +40,7 @@ namespace WebApplication3.Dao
         {
             FreeSqlHelper.Instance.Insert(userFavorite).ExecuteAffrows();
         }
-        public List<UserFavoriteTag> GetUserFavoriteTagByUserId(string userId)
+        public List<UserFavoriteTag> GetUserFavoriteTagByUserId(long userId)
         {
             return FreeSqlHelper.Instance.Select<UserFavoriteTag>().Where(u => u.UserCode == userId).ToList();
         }
@@ -48,7 +48,7 @@ namespace WebApplication3.Dao
         {
             FreeSqlHelper.Instance.Insert(userDislikedTag).ExecuteAffrows();
         }
-        public List<UserDislikedTag> GetUserDislikedTagByUserId(string userId)
+        public List<UserDislikedTag> GetUserDislikedTagByUserId(long userId)
         {
             return FreeSqlHelper.Instance.Select<UserDislikedTag>().Where(u => u.UserCode == userId).ToList();
         }

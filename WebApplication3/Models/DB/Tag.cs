@@ -28,6 +28,6 @@ namespace WebApplication3.Models.DB
         /// </summary>
         public int UId { get; set; }
 
-        public string Code { get; set; }
+        public long Code { get; set; }
     }
 }

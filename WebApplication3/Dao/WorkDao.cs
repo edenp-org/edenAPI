@@ -12,7 +12,7 @@ namespace WebApplication3.Dao
             return work;
         }
 
-        public Work GetWorkByGetWorkCode(string code)
+        public Work GetWorkByGetWorkCode(long code)
         {
            return  FreeSqlHelper.Instance.Select<Work>().Where(w=>w.Code == code).First();
         }

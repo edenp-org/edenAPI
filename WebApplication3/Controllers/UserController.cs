@@ -205,22 +205,24 @@ namespace WebApplication3.Controllers
                 if (!pairs.TryGetValue("data", out var dataObj)) throw new Exception("未获取到数据！");
                 var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
                 if (!data.TryGetValue("TagCode", out var TagCode)) throw new Exception("缺少入参Tag！");
+                if(!long.TryParse(TagCode,out long TagCodeLong)) throw new Exception("TagCode格式错误！");
                 // 获取用户信息
                 var userId = HttpContext.Items["UserId"]?.ToString();
                 var Uname = HttpContext.Items["Uname"]?.ToString();
                 var UCode = HttpContext.Items["Code"]?.ToString();
                 if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
+                if (long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权！");
 
                 if (string.IsNullOrEmpty(TagCode)) throw new Exception("标签不能为空！");
-                if (new TagBiz().GetTagByCode(TagCode) == null) throw new Exception("标签不存在！");
-                if (new UserBiz().GetUserByCode(UCode) == null) throw new Exception("用户不存在！");
+                if (new TagBiz().GetTagByCode(TagCodeLong) == null) throw new Exception("标签不存在！");
+                if (new UserBiz().GetUserByCode(UCodeLong) == null) throw new Exception("用户不存在！");
 
                 UserBiz userBiz = new UserBiz();
-                var userFavoriteTags = userBiz.GetUserFavoriteTagByUserId(UCode);
+                var userFavoriteTags = userBiz.GetUserFavoriteTagByUserId(UCodeLong);
                 userBiz.AddUserFavoriteTag(new UserFavoriteTag
                 {
-                    TagCode = TagCode,
-                    UserCode = UCode
+                    TagCode = TagCodeLong,
+                    UserCode = UCodeLong
                 });
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
@@ -253,15 +255,19 @@ namespace WebApplication3.Controllers
                 var UCode = HttpContext.Items["Code"]?.ToString();
                 if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
                 if (string.IsNullOrEmpty(TagCode)) throw new Exception("标签不能为空！");
-                if (new TagBiz().GetTagByCode(TagCode) == null) throw new Exception("标签不存在！");
-                if (new UserBiz().GetUserByCode(UCode) == null) throw new Exception("用户不存在！");
+
+                if (!long.TryParse(TagCode, out long TagCodeLong)) throw new Exception("TagCode格式错误！");
+                if (long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权！");
+
+                if (new TagBiz().GetTagByCode(TagCodeLong) == null) throw new Exception("标签不存在！");
+                if (new UserBiz().GetUserByCode(UCodeLong) == null) throw new Exception("用户不存在！");
 
                 UserBiz userBiz = new UserBiz();
-                var userDislikedTags = userBiz.GetUserDislikedTagByUserId(UCode);
+                var userDislikedTags = userBiz.GetUserDislikedTagByUserId(UCodeLong);
                 userBiz.AddUserDislikedTag(new UserDislikedTag
                 {
-                    TagCode = TagCode,
-                    UserCode = UCode
+                    TagCode = TagCodeLong,
+                    UserCode = UCodeLong
                 });
                 dic.Add("status", 200);
                 dic.Add("message", "成功");

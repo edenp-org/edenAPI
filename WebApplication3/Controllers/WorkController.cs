@@ -45,11 +45,11 @@ namespace WebApplication3.Controllers
                 var Uname = HttpContext.Items["Uname"]?.ToString();
                 var UCode = HttpContext.Items["Code"]?.ToString();
                 if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
-
+                if(!long.TryParse(UCode,out long UCodeLong)) throw new Exception("用户未授权");
                 // 处理标签
                 var tagList = tags.ToString().FromJsonString<List<string>>();
                 var tagBiz = new TagBiz();
-                var tagCodes = new ConcurrentBag<string>();
+                var tagCodes = new ConcurrentBag<long>();
 
                 tagList.ForEach(tagName =>
                 {
@@ -72,7 +72,7 @@ namespace WebApplication3.Controllers
                     {
                         Title = title.ToString(),
                         Description = description.ToString(),
-                        AuthorCode = UCode,
+                        AuthorCode = UCodeLong,
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now,
                         AuthorName = user.Username,
@@ -85,7 +85,7 @@ namespace WebApplication3.Controllers
                 tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
 
                 // 保存作品内容到文件
-                var root = Path.Combine(_env.WebRootPath, "Work", UCode);
+                var root = Path.Combine(_env.WebRootPath, "Work", UCodeLong.ToString());
                 if (!Directory.Exists(root)) Directory.CreateDirectory(root);
                 System.IO.File.WriteAllText(Path.Combine(root, work.Id + ".TXT"), content.ToString());
 
@@ -107,7 +107,7 @@ namespace WebApplication3.Controllers
         /// <param name="workId">作品ID</param>
         /// <returns>返回作品信息</returns>
         [HttpGet("GetWork")]
-        public Dictionary<string, object> GetWork(string workId = "0")
+        public Dictionary<string, object> GetWork(long workId = 0)
         {
             var dic = new Dictionary<string, object>();
             try
@@ -117,7 +117,7 @@ namespace WebApplication3.Controllers
                 if (work == null) throw new Exception("未查询到数据！");
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
-                dic.Add("data", new { work, url = Path.Combine("Work", work.AuthorCode, work.Id.ToString() + ".TXT") });
+                dic.Add("data", new { work, url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT") });
             }
             catch (Exception ex)
             {
