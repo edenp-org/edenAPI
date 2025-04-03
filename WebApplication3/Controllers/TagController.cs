@@ -70,7 +70,7 @@ namespace WebApplication3.Controllers
         /// <param name="code">标签代码</param>
         /// <returns>包含操作结果的字典</returns>
         [HttpGet("GetTag")]
-        public Dictionary<string, object> GetTag(string name="", string code = "")
+        public Dictionary<string, object> GetTag(string name="", long code = 0)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try
@@ -78,7 +78,7 @@ namespace WebApplication3.Controllers
                 TagBiz tagBiz = new TagBiz();
                 List<Tag> tag = new List<Tag>();
                 // 根据代码或名称获取标签
-                if (!string.IsNullOrEmpty(code))
+                if (code != 0)
                 {
                     tag.Add(tagBiz.GetTagByCode(code));
                 }

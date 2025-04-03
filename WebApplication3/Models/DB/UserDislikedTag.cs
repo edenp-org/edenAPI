@@ -6,11 +6,11 @@ namespace WebApplication3.Models.DB
     {
         [Required]
         [StringLength(50)]
-        public string UserCode { get; set; }
+        public long UserCode { get; set; }
 
         [Required]
         [StringLength(50)]
-        public string TagCode { get; set; }
+        public long TagCode { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

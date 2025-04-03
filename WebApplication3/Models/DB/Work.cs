@@ -39,11 +39,11 @@ namespace WebApplication3.Models.DB
         /// <summary>
         /// 作者ID，外键，关联用户表
         /// </summary>
-        public string AuthorCode { get; set; }
+        public long AuthorCode { get; set; }
 
         public string AuthorName { get; set; }
 
         public string Tags { get; set; }
-        public string Code { get; set; }
+        public long Code { get; set; }
     }
 }

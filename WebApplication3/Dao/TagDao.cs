@@ -10,7 +10,7 @@ namespace WebApplication3.Dao
             tag.Id = FreeSqlHelper.Instance.Insert(tag).ExecuteIdentity();
             return tag;
         }
-        public Tag GetTagByCode(string code)
+        public Tag GetTagByCode(long code)
         {
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Code == code).ToOne();
         }
@@ -29,7 +29,7 @@ namespace WebApplication3.Dao
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Name.Contains(name)).ToList();
          }
 
-        public void AddWorkAndTag(List<string> tagId, string workId)
+        public void AddWorkAndTag(List<long> tagId, long workId)
         {
             List<WorkAndTag> workAndTags = new List<WorkAndTag>();
             foreach (var item in tagId)
@@ -50,7 +50,7 @@ namespace WebApplication3.Dao
                 .First();
         }
 
-        public bool TagCodeExists(string code)
+        public bool TagCodeExists(long code)
         {
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Code == code).Any();
         }
