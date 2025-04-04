@@ -56,7 +56,9 @@ namespace WebApplication3.Controllers
                 // 根据用户名或邮箱获取用户
                 var user = !string.IsNullOrEmpty(email) ? userBiz.GetUserByEmail(email) : userBiz.GetUserByUname(uname);
                 if (user == null) throw new Exception("用户名或邮箱或密码不存在！");
-                if (!user.Password.Equals(EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(password) + user.Confuse))) throw new Exception("用户名或邮箱或密码不存在！");
+                if (!user.Password.Equals(
+                        EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(password) + user.Confuse)))
+                    throw new Exception("用户名或邮箱或密码不存在！");
 
                 // 生成Token
                 var token = TokenService.GenerateToken(user.Username, user.Role.ToString(), "登录");
@@ -128,6 +130,7 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 400);
                 dic.Add("message", ex.Message);
             }
+
             return dic;
         }
 
@@ -151,7 +154,8 @@ namespace WebApplication3.Controllers
                 if (!data.TryGetValue("passwordSecond", out var passwordSecond)) throw new Exception("请输入确认密码！");
                 if (!data.TryGetValue("captcha", out var captcha)) throw new Exception("请输入验证码！");
                 if (password != passwordSecond) throw new Exception("两次密码不一致！");
-                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(uname) || string.IsNullOrEmpty(password)) throw new Exception("请填写完整信息！");
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(uname) || string.IsNullOrEmpty(password))
+                    throw new Exception("请填写完整信息！");
 
                 var userBiz = new UserBiz();
                 var userTokenBiz = new UserTokenBiz();
@@ -161,7 +165,8 @@ namespace WebApplication3.Controllers
                 if (userBiz.GetUserByUname(uname) != null) throw new Exception("用户名已被注册！");
 
                 // 验证验证码
-                var userToken = userTokenBiz.GetTokenByUserAndPurpose(email, "注册").FirstOrDefault(u => u.Token.Equals(captcha));
+                var userToken = userTokenBiz.GetTokenByUserAndPurpose(email, "注册")
+                    .FirstOrDefault(u => u.Token.Equals(captcha));
                 if (userToken == null) throw new Exception("验证码错误或已过期！");
 
                 // 注册新用户
@@ -188,6 +193,7 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 400);
                 dic.Add("message", ex.Message);
             }
+
             return dic;
         }
 
@@ -205,7 +211,7 @@ namespace WebApplication3.Controllers
                 if (!pairs.TryGetValue("data", out var dataObj)) throw new Exception("未获取到数据！");
                 var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
                 if (!data.TryGetValue("TagCode", out var TagCode)) throw new Exception("缺少入参Tag！");
-                if(!long.TryParse(TagCode,out long TagCodeLong)) throw new Exception("TagCode格式错误！");
+                if (!long.TryParse(TagCode, out long TagCodeLong)) throw new Exception("TagCode格式错误！");
                 // 获取用户信息
                 var userId = HttpContext.Items["UserId"]?.ToString();
                 var Uname = HttpContext.Items["Uname"]?.ToString();
@@ -232,6 +238,7 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 400);
                 dic.Add("message", ex.Message);
             }
+
             return dic;
         }
 
@@ -277,6 +284,7 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 400);
                 dic.Add("message", ex.Message);
             }
+
             return dic;
         }
     }

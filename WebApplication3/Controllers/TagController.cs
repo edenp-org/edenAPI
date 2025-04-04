@@ -60,6 +60,7 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 400);
                 dic.Add("message", e.Message);
             }
+
             return dic;
         }
 
@@ -70,7 +71,7 @@ namespace WebApplication3.Controllers
         /// <param name="code">标签代码</param>
         /// <returns>包含操作结果的字典</returns>
         [HttpGet("GetTag")]
-        public Dictionary<string, object> GetTag(string name="", long code = 0)
+        public Dictionary<string, object> GetTag(string name = "", long code = 0)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try
@@ -86,6 +87,7 @@ namespace WebApplication3.Controllers
                 {
                     tag = tagBiz.GetTagByFuzzyName(name);
                 }
+
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
                 dic.Add("data", tag.Select(a => new { a.Code, a.Name, a.CreatedAt }));
@@ -95,6 +97,7 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 400);
                 dic.Add("message", e.Message);
             }
+
             return dic;
         }
     }

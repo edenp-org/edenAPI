@@ -41,9 +41,19 @@ namespace WebApplication3.Models.DB
         /// </summary>
         public long AuthorCode { get; set; }
 
+        /// <summary>
+        /// 作者名称
+        /// </summary>
         public string AuthorName { get; set; }
 
+        /// <summary>
+        /// 标签
+        /// </summary>
         public string Tags { get; set; }
+
+        /// <summary>
+        /// 作品编码
+        /// </summary>
         public long Code { get; set; }
     }
 }

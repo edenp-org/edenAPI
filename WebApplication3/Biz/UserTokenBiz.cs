@@ -11,12 +11,13 @@ namespace WebApplication3.Biz
         {
             dao.Add(user);
         }
-        public List<UserToken> GetTokenByUserAndPurpose(string user,string Purpose)
+
+        public List<UserToken> GetTokenByUserAndPurpose(string user, string Purpose)
         {
-           return dao.GetTokenByUserAndPurpose(user, Purpose);
+            return dao.GetTokenByUserAndPurpose(user, Purpose);
         }
 
-        public bool IsExist(string uname,string Token, string Purpose) 
+        public bool IsExist(string uname, string Token, string Purpose)
         {
             return dao.IsExist(uname, Token, Purpose);
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
@@ -33,19 +34,24 @@ namespace WebApplication3.Controllers
             try
             {
                 // 验证输入参数
-                if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString())) throw new Exception("没有入参！");
+                if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
+                    throw new Exception("没有入参！");
                 var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
-                if (!data.TryGetValue("title", out var title) || string.IsNullOrEmpty(title.ToString())) throw new Exception("请输入标题！");
-                if (!data.TryGetValue("description", out var description) || string.IsNullOrEmpty(description.ToString())) throw new Exception("请输入介绍！");
-                if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString())) throw new Exception("请输入内容！");
-                if (!data.TryGetValue("Tags", out var tags) || string.IsNullOrEmpty(tags.ToString())) throw new Exception("没有标签！");
+                if (!data.TryGetValue("title", out var title) || string.IsNullOrEmpty(title.ToString()))
+                    throw new Exception("请输入标题！");
+                if (!data.TryGetValue("description", out var description) ||
+                    string.IsNullOrEmpty(description.ToString())) throw new Exception("请输入介绍！");
+                if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
+                    throw new Exception("请输入内容！");
+                if (!data.TryGetValue("Tags", out var tags) || string.IsNullOrEmpty(tags.ToString()))
+                    throw new Exception("没有标签！");
 
                 // 获取用户信息
                 var userId = HttpContext.Items["UserId"]?.ToString();
                 var Uname = HttpContext.Items["Uname"]?.ToString();
                 var UCode = HttpContext.Items["Code"]?.ToString();
                 if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
-                if(!long.TryParse(UCode,out long UCodeLong)) throw new Exception("用户未授权");
+                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权");
                 // 处理标签
                 var tagList = tags.ToString().FromJsonString<List<string>>();
                 var tagBiz = new TagBiz();
@@ -117,14 +123,58 @@ namespace WebApplication3.Controllers
                 if (work == null) throw new Exception("未查询到数据！");
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
-                dic.Add("data", new { work, url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT") });
+                dic.Add("data",
+                    new { work, url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT") });
             }
             catch (Exception ex)
             {
                 dic.Add("status", 400);
                 dic.Add("message", ex.Message);
             }
+
             return dic;
-        } 
+        }
+
+        /// <summary>
+        /// 获取自己喜欢的标签的文章
+        /// </summary>
+        /// <param name="page">第几页</param>
+        /// <param name="pageSize">每页几个</param>
+        /// <returns>返回作品信息</returns>
+        [Authorize(false), HttpGet("GetArticlesByUserFavoriteTags")]
+        [SuppressMessage("ReSharper.DPA", "DPA0010: ASP issues")]
+        public Dictionary<string, object> GetArticlesByUserFavoriteTags(int page = 0, int pageSize = 0)
+        {
+            var dic = new Dictionary<string, object>();
+            try
+            {
+                // 获取用户Code
+                var uCode = HttpContext.Items["Code"]?.ToString();
+                if (string.IsNullOrEmpty(uCode) || !long.TryParse(uCode, out long userCode))
+                {
+                    throw new Exception("用户未授权！");
+                }
+
+                var workBiz = new WorkBiz();
+                var workList = workBiz.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
+                if (workList == null) throw new Exception("未查询到数据！");
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
+                dic.Add("data", workList.Select(a => new
+                {
+                    a.Code,
+                    a.Tags,
+                    a.Description
+                }));
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+
+            return dic;
+        }
+
     }
 }

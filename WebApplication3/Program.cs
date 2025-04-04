@@ -21,8 +21,8 @@ namespace WebApplication3
                     policy =>
                     {
                         policy.AllowAnyOrigin()
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
                     });
             });
 
@@ -31,7 +31,7 @@ namespace WebApplication3
             {
                 option.CaptchaType = CaptchaType.NUMBER; // 验证码类型
                 option.CodeLength = 4; // 验证码长度, 要放在CaptchaType设置后.  当类型为算术表达式时，长度代表操作的个数
-                option.ExpirySeconds = 30*60; // 验证码过期时间
+                option.ExpirySeconds = 30 * 60; // 验证码过期时间
                 option.IgnoreCase = true; // 比较时是否忽略大小写
                 option.StoreageKeyPrefix = ""; // 存储键前缀
 
@@ -52,12 +52,12 @@ namespace WebApplication3
                 option.ImageOption.FontSize = 36; // 字体大小
                 option.ImageOption.FontFamily = DefaultFontFamilys.Instance.Actionj; // 字体
 
-                /* 
+                /*
                  * 中文使用kaiti，其他字符可根据喜好设置（可能部分转字符会出现绘制不出的情况）。
                  * 当验证码类型为“ARITHMETIC”时，不要使用“Ransom”字体。（运算符和等号绘制不出来）
                  */
 
-                option.ImageOption.TextBold = true;// 粗体，该配置2.0.3新增
+                option.ImageOption.TextBold = true; // 粗体，该配置2.0.3新增
             });
 
             var app = builder.Build();
@@ -83,7 +83,7 @@ namespace WebApplication3
                 name: "default",
                 pattern: "{action=Index}/{id?}",
                 defaults: new { controller = "Home" }
-                );
+            );
 
             app.Run();
         }

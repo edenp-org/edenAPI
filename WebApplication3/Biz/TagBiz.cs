@@ -7,6 +7,7 @@ namespace WebApplication3.Biz
     public class TagBiz
     {
         TagDao tagDao = new TagDao();
+
         public Tag AddTag(Tag tag)
         {
             return tagDao.AddTag(tag);
@@ -17,7 +18,7 @@ namespace WebApplication3.Biz
             return tagDao.GetTagByCode(code);
         }
 
-        public Tag GetTagByName(string name) 
+        public Tag GetTagByName(string name)
         {
             return tagDao.GetTagByName(name);
         }
@@ -26,6 +27,7 @@ namespace WebApplication3.Biz
         {
             return tagDao.GetTagByFuzzyName(name);
         }
+
         public void AddWorkAndTag(List<long> tagId, long workId)
         {
             tagDao.AddWorkAndTag(tagId, workId);
@@ -44,6 +46,7 @@ namespace WebApplication3.Biz
             {
                 newCode = 1; // 如果没有标签，初始化为1
             }
+
             return newCode;
         }
 

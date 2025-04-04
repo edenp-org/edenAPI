@@ -11,10 +11,12 @@ namespace WebApplication3.Biz
         {
             return workDao.AddWork(work);
         }
-        public Work GetWorkByGetWorkCode(long code) 
+
+        public Work GetWorkByGetWorkCode(long code)
         {
             return workDao.GetWorkByGetWorkCode(code);
         }
+
         public Work GetMaxCodeWork()
         {
             return workDao.GetMaxCodeWork();
@@ -32,6 +34,11 @@ namespace WebApplication3.Biz
             {
                 return 1; // 如果没有作品，初始化为00000001
             }
+        }
+
+        public List<Work> GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
+        {
+            return workDao.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
         }
     }
 }
