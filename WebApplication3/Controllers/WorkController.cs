@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
@@ -133,5 +134,47 @@ namespace WebApplication3.Controllers
 
             return dic;
         }
+
+        /// <summary>
+        /// 获取自己喜欢的标签的文章
+        /// </summary>
+        /// <param name="page">第几页</param>
+        /// <param name="pageSize">每页几个</param>
+        /// <returns>返回作品信息</returns>
+        [Authorize(false), HttpGet("GetArticlesByUserFavoriteTags")]
+        [SuppressMessage("ReSharper.DPA", "DPA0010: ASP issues")]
+        public Dictionary<string, object> GetArticlesByUserFavoriteTags(int page = 0, int pageSize = 0)
+        {
+            var dic = new Dictionary<string, object>();
+            try
+            {
+                // 获取用户Code
+                var uCode = HttpContext.Items["Code"]?.ToString();
+                if (string.IsNullOrEmpty(uCode) || !long.TryParse(uCode, out long userCode))
+                {
+                    throw new Exception("用户未授权！");
+                }
+
+                var workBiz = new WorkBiz();
+                var workList = workBiz.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
+                if (workList == null) throw new Exception("未查询到数据！");
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
+                dic.Add("data", workList.Select(a => new
+                {
+                    a.Code,
+                    a.Tags,
+                    a.Description
+                }));
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+
+            return dic;
+        }
+
     }
 }

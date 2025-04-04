@@ -35,5 +35,10 @@ namespace WebApplication3.Biz
                 return 1; // 如果没有作品，初始化为00000001
             }
         }
+
+        public List<Work> GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
+        {
+            return workDao.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
+        }
     }
 }
