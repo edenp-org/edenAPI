@@ -14,8 +14,9 @@ namespace WebApplication3.Dao
 
         public Work GetWorkByGetWorkCode(long code)
         {
-           return  FreeSqlHelper.Instance.Select<Work>().Where(w=>w.Code == code).First();
+            return FreeSqlHelper.Instance.Select<Work>().Where(w => w.Code == code).First();
         }
+
         public Work GetMaxCodeWork()
         {
             return FreeSqlHelper.Instance.Select<Work>()

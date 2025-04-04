@@ -79,13 +79,13 @@ namespace WebApplication3.Biz
         {
             // 查询当前数据库中最大的 Code
             var maxCodeUser = GetMaxCodeUser();
-            if (maxCodeUser != null && maxCodeUser.Code!=0)
+            if (maxCodeUser != null && maxCodeUser.Code != 0)
             {
                 return (maxCodeUser.Code + 1);
             }
             else
             {
-                return 1; 
+                return 1;
             }
         }
 

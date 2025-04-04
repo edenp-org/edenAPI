@@ -11,10 +11,12 @@ namespace WebApplication3.Biz
         {
             return workDao.AddWork(work);
         }
-        public Work GetWorkByGetWorkCode(long code) 
+
+        public Work GetWorkByGetWorkCode(long code)
         {
             return workDao.GetWorkByGetWorkCode(code);
         }
+
         public Work GetMaxCodeWork()
         {
             return workDao.GetMaxCodeWork();

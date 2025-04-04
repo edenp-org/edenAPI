@@ -12,21 +12,19 @@ namespace WebApplication3.Models.DB
         public List<UserToken> GetTokenByUserAndPurpose(string user, string Purpose)
         {
             return FreeSqlHelper.Instance
-                 .Select<UserToken>()
-                 .Where(u => u.Username == user && u.Purpose == Purpose && u.Expiration >= DateTime.Now)
-                 .ToList();
+                .Select<UserToken>()
+                .Where(u => u.Username == user && u.Purpose == Purpose && u.Expiration >= DateTime.Now)
+                .ToList();
         }
 
         public bool IsExist(string uname, string Token, string Purpose)
         {
             return FreeSqlHelper.Instance
                 .Select<UserToken>()
-                .Where(t => t.Username.Equals(uname) &&t.Purpose.Equals(Purpose) &&t.Expiration >= DateTime.Now)
+                .Where(t => t.Username.Equals(uname) && t.Purpose.Equals(Purpose) && t.Expiration >= DateTime.Now)
                 .ToList()
-                .Where(t=>t.Token.Equals(Token))
+                .Where(t => t.Token.Equals(Token))
                 .Any();
         }
-
-
     }
 }

@@ -5,11 +5,12 @@ namespace WebApplication3.Dao
 {
     public class TagDao
     {
-        public Tag AddTag(Tag tag) 
+        public Tag AddTag(Tag tag)
         {
             tag.Id = FreeSqlHelper.Instance.Insert(tag).ExecuteIdentity();
             return tag;
         }
+
         public Tag GetTagByCode(long code)
         {
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Code == code).ToOne();
@@ -17,17 +18,18 @@ namespace WebApplication3.Dao
 
         public Tag GetTagByName(string name)
         {
-            return  FreeSqlHelper.Instance.Select<Tag>().Where(t=>t.Name.Equals(name)).ToOne();
+            return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Name.Equals(name)).ToOne();
         }
 
-        public List<Tag> GetAllTags() 
+        public List<Tag> GetAllTags()
         {
             return FreeSqlHelper.Instance.Select<Tag>().ToList();
         }
+
         public List<Tag> GetTagByFuzzyName(string name)
         {
             return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Name.Contains(name)).ToList();
-         }
+        }
 
         public void AddWorkAndTag(List<long> tagId, long workId)
         {
@@ -40,19 +42,22 @@ namespace WebApplication3.Dao
                     WorkId = workId
                 });
             }
+
             FreeSqlHelper.Instance.Insert(workAndTags).ExecuteAffrows();
         }
 
         public Tag GetMaxCodeTag()
         {
             return FreeSqlHelper.Instance.Select<Tag>()
-                .OrderByDescending(t => Convert.ToInt32(t.Code))
+                .OrderByDescending(t => t.Code)
                 .First();
         }
 
         public bool TagCodeExists(long code)
         {
-            return FreeSqlHelper.Instance.Select<Tag>().Where(t => t.Code == code).Any();
+            return FreeSqlHelper.Instance.Select<Tag>()
+                .Where(t => t.Code == code)
+                .Any();
         }
     }
 }

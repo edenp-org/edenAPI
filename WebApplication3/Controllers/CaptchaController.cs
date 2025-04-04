@@ -26,11 +26,14 @@ namespace WebApplication3.Controllers
                 //var info = _captcha.Generate(id,120);
                 return new Dictionary<string, object>()
                 {
-                    { "status", 200},
-                    {"data",new{
-                        CaptchaID=id,
-                        Base64=info.Base64,
-                    }},
+                    { "status", 200 },
+                    {
+                        "data", new
+                        {
+                            CaptchaID = id,
+                            Base64 = info.Base64,
+                        }
+                    },
                     { "message", "成功" }
                 };
             }
@@ -38,7 +41,7 @@ namespace WebApplication3.Controllers
             {
                 return new Dictionary<string, object>()
                 {
-                    { "status", 400},
+                    { "status", 400 },
                     { "message", ex.Message }
                 };
 
