@@ -142,7 +142,6 @@ namespace WebApplication3.Controllers
         /// <param name="pageSize">每页几个</param>
         /// <returns>返回作品信息</returns>
         [Authorize(false), HttpGet("GetArticlesByUserFavoriteTags")]
-        [SuppressMessage("ReSharper.DPA", "DPA0010: ASP issues")]
         public Dictionary<string, object> GetArticlesByUserFavoriteTags(int page = 0, int pageSize = 0)
         {
             var dic = new Dictionary<string, object>();

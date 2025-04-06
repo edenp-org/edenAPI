@@ -8,6 +8,10 @@ namespace WebApplication3.Models.DB
         public long UserCode { get; set; }
         [Required]
         public long TagCode { get; set; }
+
+        [Required]
+        public string TagName { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     }

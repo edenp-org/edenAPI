@@ -59,3 +59,4 @@ WebApplication3/wwwroot/Work/
 # VS
 .vs/
 .idea/
+qodana.yaml

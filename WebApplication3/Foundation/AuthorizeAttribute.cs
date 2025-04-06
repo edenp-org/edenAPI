@@ -10,12 +10,15 @@ namespace WebApplication3.Foundation
     public class AuthorizeAttribute : Attribute, IAuthorizationFilter
     {
         bool IsAdmin = false;
-        public AuthorizeAttribute(bool IsAdmin) 
+
+        public AuthorizeAttribute(bool IsAdmin)
         {
             this.IsAdmin = IsAdmin;
         }
+
         public void OnAuthorization(AuthorizationFilterContext context)
         {
+
             if (context.HttpContext.Request.Headers["Authorization"].Count == 0)
             {
                 context.Result = new UnauthorizedResult();
@@ -24,7 +27,6 @@ namespace WebApplication3.Foundation
             var token = context.HttpContext.Request.Headers["Authorization"].ToString();
             var claimsPrincipal = TokenService.ValidateToken(token);
             var role = claimsPrincipal.FindFirst(ClaimTypes.Name);
-
 
             UserBiz userBiz = new UserBiz();
             var user = userBiz.GetUserByUname(role.Value);
@@ -37,7 +39,10 @@ namespace WebApplication3.Foundation
             if (!tokenBiz.IsExist(role.Value, token, "登录")) throw new Exception("鉴权失败！");
 
             if (user == null) throw new Exception("鉴权失败！");
-            if (IsAdmin) if (user.Role != 1) throw new Exception("鉴权失败！");
+            if (IsAdmin)
+                if (user.Role != 1)
+                    throw new Exception("鉴权失败！");
+
         }
     }
 }
