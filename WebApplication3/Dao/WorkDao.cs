@@ -20,7 +20,7 @@ namespace WebApplication3.Dao
         public Work GetMaxCodeWork()
         {
             return FreeSqlHelper.Instance.Select<Work>()
-                .OrderByDescending(w => Convert.ToInt32(w.Code))
+                .OrderByDescending(w => w.Code)
                 .First();
         }
 

@@ -126,5 +126,22 @@ namespace WebApplication3.Biz
         {
             return dao.GetUserDislikedTagByUserId(userId);
         }
+        /// <summary>
+        /// 添加用户喜欢的作品
+        /// </summary>
+        /// <param name="userLikeWork">要添加的对象</param>
+        public void AddUserLikeWork(UserLikeWork userLikeWork)
+        {
+            dao.AddUserLikeWork(userLikeWork);
+        }
+        /// <summary>
+        /// 删除用户喜欢的标签
+        /// </summary>
+        /// <param name="userId">用户code</param>
+        /// <param name="tagId">Tagode</param>
+        public void DeleteUsersLikeTag(long userId, long tagId)
+        {
+            dao.DeleteUsersLikeTag(userId, tagId);
+        }
     }
 }

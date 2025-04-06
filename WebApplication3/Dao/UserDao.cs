@@ -63,6 +63,16 @@ namespace WebApplication3.Dao
                 .Where(u => u.UserCode == userId)
                 .ToList();
         }
+        public void AddUserLikeWork(UserLikeWork userLikeWork)
+        {
+            FreeSqlHelper.Instance.Insert(userLikeWork).ExecuteAffrows();
+        }
 
+        public void DeleteUsersLikeTag(long userId, long tagId)
+        {
+            FreeSqlHelper.Instance.Delete<UserDislikedTag>()
+                .Where(i => i.UserCode == userId && i.TagCode == tagId)
+                .ExecuteAffrows();
+        }
     }
 }

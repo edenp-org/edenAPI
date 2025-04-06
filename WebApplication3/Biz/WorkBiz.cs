@@ -28,7 +28,7 @@ namespace WebApplication3.Biz
             long maxCode = 0;
             if (maxCodeWork != null && maxCodeWork.Code != 0)
             {
-                return (maxCode + 1); // 生成新的 Code，格式为8位数字
+                return maxCode + 1; // 生成新的 Code，格式为8位数字
             }
             else
             {
