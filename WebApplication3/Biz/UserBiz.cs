@@ -107,6 +107,10 @@ namespace WebApplication3.Biz
         {
             return dao.GetUserFavoriteTagByUserId(userId);
         }
+        public UserFavoriteTag GetUserFavoriteTagByUserId(long userId,long tagId)
+        {
+            return dao.GetUserFavoriteTagByUserId(userId,tagId);
+        }
 
         /// <summary>
         /// 添加用户不喜欢的标签
@@ -125,6 +129,10 @@ namespace WebApplication3.Biz
         public List<UserDislikedTag> GetUserDislikedTagByUserId(long userId)
         {
             return dao.GetUserDislikedTagByUserId(userId);
+        }
+        public UserDislikedTag GetUserDislikedTagByUserId(long userId,long tagId)
+        {
+            return dao.GetUserDislikedTagByUserId(userId,tagId);
         }
         /// <summary>
         /// 添加用户喜欢的作品

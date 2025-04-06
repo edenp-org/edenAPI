@@ -5,12 +5,16 @@ namespace WebApplication3.Models.DB
     public class UserDislikedTag
     {
         [Required]
-        [StringLength(50)]
         public long UserCode { get; set; }
 
         [Required]
-        [StringLength(50)]
         public long TagCode { get; set; }
+
+        [Required]
+        public string UserName { get; set; }
+
+        [Required]
+        public string TagName { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

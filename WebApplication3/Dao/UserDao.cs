@@ -51,6 +51,12 @@ namespace WebApplication3.Dao
                 .Where(u => u.UserCode == userId)
                 .ToList();
         }
+        public UserFavoriteTag GetUserFavoriteTagByUserId(long userId,long tagId)
+        {
+            return FreeSqlHelper.Instance.Select<UserFavoriteTag>()
+                .Where(u => u.UserCode == userId&& u.TagCode == tagId)
+                .First();
+        }
 
         public void AddUserDislikedTag(UserDislikedTag userDislikedTag)
         {
@@ -63,6 +69,13 @@ namespace WebApplication3.Dao
                 .Where(u => u.UserCode == userId)
                 .ToList();
         }
+
+        public UserDislikedTag GetUserDislikedTagByUserId(long userId,long tagId)
+        {
+            return FreeSqlHelper.Instance.Select<UserDislikedTag>()
+                .Where(u => u.UserCode == userId && u.TagCode == tagId)
+                .First();
+        }
         public void AddUserLikeWork(UserLikeWork userLikeWork)
         {
             FreeSqlHelper.Instance.Insert(userLikeWork).ExecuteAffrows();
@@ -70,7 +83,7 @@ namespace WebApplication3.Dao
 
         public void DeleteUsersLikeTag(long userId, long tagId)
         {
-            FreeSqlHelper.Instance.Delete<UserDislikedTag>()
+            var cont = FreeSqlHelper.Instance.Delete<UserFavoriteTag>()
                 .Where(i => i.UserCode == userId && i.TagCode == tagId)
                 .ExecuteAffrows();
         }
