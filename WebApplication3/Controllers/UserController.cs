@@ -13,47 +13,75 @@ namespace WebApplication3.Controllers
     {
         public class LoginRequest
         {
-            public string Password { get; set; }
-            public string CaptchaId { get; set; }
-            public string CaptchaInput { get; set; }
-            public string Uname { get; set; }
-            public string Email { get; set; }
+            public LoginRequestData data { get; set; }
+            public class LoginRequestData
+            {
+                public string Password { get; set; }
+                public string CaptchaId { get; set; }
+                public string CaptchaInput { get; set; }
+                public string Uname { get; set; }
+                public string Email { get; set; }
+            }
         }
 
         public class SendEmailVerificationCodeRequest
         {
-            public string Email { get; set; }
-            public string CaptchaId { get; set; }
-            public string CaptchaInput { get; set; }
+            public SendEmailVerificationCodeRequestData data { get; set; }
+            public class SendEmailVerificationCodeRequestData
+            {
+                public string Email { get; set; }
+                public string CaptchaId { get; set; }
+                public string CaptchaInput { get; set; }
+            }
         }
 
         public class RegisterRequest
         {
-            public string Email { get; set; }
-            public string Uname { get; set; }
-            public string Password { get; set; }
-            public string PasswordSecond { get; set; }
-            public string Captcha { get; set; }
+            public RegisterRequestData data { get; set; }
+            public class RegisterRequestData
+            {
+                public string Email { get; set; }
+                public string Uname { get; set; }
+                public string Password { get; set; }
+                public string PasswordSecond { get; set; }
+                public string Captcha { get; set; }
+            }
         }
 
         public class AddUsersLikeTagRequest
         {
-            public long TagCode { get; set; }
+            public AddUsersLikeTagRequestData data { get; set; }
+            public class AddUsersLikeTagRequestData
+            {
+                public long TagCode { get; set; }
+            }
         }
 
         public class DeleteUsersLikeTagRequest
         {
-            public long TagCode { get; set; }
+            public DeleteUsersLikeTagRequestRequestData data { get; set; }
+            public class DeleteUsersLikeTagRequestRequestData
+            {
+                public long TagCode { get; set; }
+            }
         }
 
         public class AddUserDislikedTagRequest
         {
-            public long TagCode { get; set; }
+            public AddUserDislikedTagRequestData data { get; set; }
+            public class AddUserDislikedTagRequestData
+            {
+                public long TagCode { get; set; }
+            }
         }
 
         public class AddUserLikeWorkRequest
         {
-            public long WorkCode { get; set; }
+            public AddUserLikeWorkRequestData data { get; set; }
+            public class AddUserLikeWorkRequestData
+            {
+                public long WorkCode { get; set; }
+            }
         }
 
         private readonly ICaptcha _captcha;
@@ -76,23 +104,23 @@ namespace WebApplication3.Controllers
             try
             {
                 // 验证输入参数
-                if (string.IsNullOrEmpty(request.Password)) throw new Exception("请输入密码！");
-                if (string.IsNullOrEmpty(request.CaptchaId)) throw new Exception("未获取到验证码ID！");
-                if (string.IsNullOrEmpty(request.CaptchaInput)) throw new Exception("请输入验证码！");
-                if (string.IsNullOrEmpty(request.Uname) && string.IsNullOrEmpty(request.Email)) throw new Exception("请选择登录方式");
-                if (!string.IsNullOrEmpty(request.Uname) && !string.IsNullOrEmpty(request.Email)) throw new Exception("请选择登录方式");
+                if (string.IsNullOrEmpty(request.data.Password)) throw new Exception("请输入密码！");
+                if (string.IsNullOrEmpty(request.data.CaptchaId)) throw new Exception("未获取到验证码ID！");
+                if (string.IsNullOrEmpty(request.data.CaptchaInput)) throw new Exception("请输入验证码！");
+                if (string.IsNullOrEmpty(request.data.Uname) && string.IsNullOrEmpty(request.data.Email)) throw new Exception("请选择登录方式");
+                if (!string.IsNullOrEmpty(request.data.Uname) && !string.IsNullOrEmpty(request.data.Email)) throw new Exception("请选择登录方式");
 
                 // 验证验证码
-                if (!_captcha.Validate(request.CaptchaId, request.CaptchaInput)) throw new Exception("验证码错误！");
+                if (!_captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new Exception("验证码错误！");
 
                 var userBiz = new UserBiz();
                 var userTokenBiz = new UserTokenBiz();
 
                 // 根据用户名或邮箱获取用户
-                var user = !string.IsNullOrEmpty(request.Email) ? userBiz.GetUserByEmail(request.Email) : userBiz.GetUserByUname(request.Uname);
+                var user = !string.IsNullOrEmpty(request.data.Email) ? userBiz.GetUserByEmail(request.data.Email) : userBiz.GetUserByUname(request.data.Uname);
                 if (user == null) throw new Exception("用户名或邮箱或密码不存在！");
                 if (!user.Password.Equals(
-                        EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(request.Password) + user.Confuse)))
+                        EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(request.data.Password) + user.Confuse)))
                     throw new Exception("用户名或邮箱或密码不存在！");
 
                 // 生成Token
@@ -133,10 +161,10 @@ namespace WebApplication3.Controllers
             try
             {
                 // 验证输入参数
-                if (string.IsNullOrEmpty(request.Email)) throw new Exception("请输入邮箱！");
-                if (string.IsNullOrEmpty(request.CaptchaId)) throw new Exception("请输入验证码ID！");
-                if (string.IsNullOrEmpty(request.CaptchaInput)) throw new Exception("请输入验证码！");
-                if (!_captcha.Validate(request.CaptchaId, request.CaptchaInput)) throw new Exception("错误的验证码");
+                if (string.IsNullOrEmpty(request.data.Email)) throw new Exception("请输入邮箱！");
+                if (string.IsNullOrEmpty(request.data.CaptchaId)) throw new Exception("请输入验证码ID！");
+                if (string.IsNullOrEmpty(request.data.CaptchaInput)) throw new Exception("请输入验证码！");
+                if (!_captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new Exception("错误的验证码");
 
                 // 生成验证码
                 var token = new Random().Next(100000, 999999).ToString();
@@ -149,11 +177,11 @@ namespace WebApplication3.Controllers
                     CreatedAt = DateTime.Now,
                     Purpose = "注册",
                     Token = token,
-                    Username = request.Email
+                    Username = request.data.Email
                 });
 
                 // 发送邮件
-                EmailHelper.SendEmail(request.Email, "邮箱验证", $"您的验证码是：{token} \r\n 该验证码5分钟后过期!");
+                EmailHelper.SendEmail(request.data.Email, "邮箱验证", $"您的验证码是：{token} \r\n 该验证码5分钟后过期!");
 
                 dic.Add("status", 200);
                 dic.Add("message", "验证码已发送至邮箱，请查收！");
@@ -178,25 +206,25 @@ namespace WebApplication3.Controllers
             try
             {
                 // 验证输入参数
-                if (string.IsNullOrEmpty(request.Email)) throw new Exception("请输入邮箱！");
-                if (string.IsNullOrEmpty(request.Uname)) throw new Exception("请输入用户名！");
-                if (string.IsNullOrEmpty(request.Password)) throw new Exception("请输入密码！");
-                if (string.IsNullOrEmpty(request.PasswordSecond)) throw new Exception("请输入确认密码！");
-                if (string.IsNullOrEmpty(request.Captcha)) throw new Exception("请输入验证码！");
-                if (request.Password != request.PasswordSecond) throw new Exception("两次密码不一致！");
-                if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Uname) || string.IsNullOrEmpty(request.Password))
+                if (string.IsNullOrEmpty(request.data.Email)) throw new Exception("请输入邮箱！");
+                if (string.IsNullOrEmpty(request.data.Uname)) throw new Exception("请输入用户名！");
+                if (string.IsNullOrEmpty(request.data.Password)) throw new Exception("请输入密码！");
+                if (string.IsNullOrEmpty(request.data.PasswordSecond)) throw new Exception("请输入确认密码！");
+                if (string.IsNullOrEmpty(request.data.Captcha)) throw new Exception("请输入验证码！");
+                if (request.data.Password != request.data.PasswordSecond) throw new Exception("两次密码不一致！");
+                if (string.IsNullOrEmpty(request.data.Email) || string.IsNullOrEmpty(request.data.Uname) || string.IsNullOrEmpty(request.data.Password))
                     throw new Exception("请填写完整信息！");
 
                 var userBiz = new UserBiz();
                 var userTokenBiz = new UserTokenBiz();
 
                 // 检查邮箱和用户名是否已被注册
-                if (userBiz.GetUserByEmail(request.Email) != null) throw new Exception("邮箱已被注册！");
-                if (userBiz.GetUserByUname(request.Uname) != null) throw new Exception("用户名已被注册！");
+                if (userBiz.GetUserByEmail(request.data.Email) != null) throw new Exception("邮箱已被注册！");
+                if (userBiz.GetUserByUname(request.data.Uname) != null) throw new Exception("用户名已被注册！");
 
                 // 验证验证码
-                var userToken = userTokenBiz.GetTokenByUserAndPurpose(request.Email, "注册")
-                    .FirstOrDefault(u => u.Token.Equals(request.Captcha));
+                var userToken = userTokenBiz.GetTokenByUserAndPurpose(request.data.Email, "注册")
+                    .FirstOrDefault(u => u.Token.Equals(request.data.Captcha));
                 if (userToken == null) throw new Exception("验证码错误或已过期！");
 
                 // 注册新用户
@@ -206,9 +234,9 @@ namespace WebApplication3.Controllers
                     var confuse = new Random().Next(100000, 999999).ToString("X");
                     userBiz.Add(new User
                     {
-                        Email = request.Email,
-                        Username = request.Uname,
-                        Password = EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(request.Password) + confuse),
+                        Email = request.data.Email,
+                        Username = request.data.Uname,
+                        Password = EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(request.data.Password) + confuse),
                         Code = newCodeUser,
                         Confuse = confuse,
                         Role = 2
@@ -238,21 +266,20 @@ namespace WebApplication3.Controllers
             var dic = new Dictionary<string, object>();
             try
             {
-                // 获取用户信息
-                var userId = HttpContext.Items["UserId"]?.ToString();
-                var Uname = HttpContext.Items["Uname"]?.ToString();
-                var UCode = HttpContext.Items["Code"]?.ToString();
-                if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
-                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权！");
+                var user = UserHelper.GetUserFromContext(HttpContext);
 
-                if (new TagBiz().GetTagByCode(request.TagCode) == null) throw new Exception("标签不存在！");
-                if (new UserBiz().GetUserByCode(UCodeLong) == null) throw new Exception("用户不存在！");
+                var tag = new TagBiz().GetTagByCode(request.data.TagCode);
+                if (tag == null) throw new Exception("标签不存在！");
 
                 UserBiz userBiz = new UserBiz();
+                var favoriteTags = userBiz.GetUserFavoriteTagByUserId(user.Code,tag.Id);
+                if (favoriteTags == null) throw new Exception("已添加该标签！");
                 userBiz.AddUserFavoriteTag(new UserFavoriteTag
                 {
-                    TagCode = request.TagCode,
-                    UserCode = UCodeLong
+                    TagCode = tag.Code,
+                    UserCode = user.Code,
+                    TagName = tag.Name,
+                    UserName = user.Username
                 });
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
@@ -277,14 +304,10 @@ namespace WebApplication3.Controllers
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try
             {
-                // 获取用户信息
-                var userId = HttpContext.Items["UserId"]?.ToString();
-                var Uname = HttpContext.Items["Uname"]?.ToString();
-                var UCode = HttpContext.Items["Code"]?.ToString();
+                var user = UserHelper.GetUserFromContext(HttpContext);
 
-                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权！");
                 UserBiz userBiz = new UserBiz();
-                userBiz.DeleteUsersLikeTag(UCodeLong, request.TagCode);
+                userBiz.DeleteUsersLikeTag(user.Code, request.data.TagCode);
 
                 dic.Add("status", "200");
                 dic.Add("message", "成功");
@@ -309,17 +332,18 @@ namespace WebApplication3.Controllers
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try
             {
-                // 获取用户信息
-                var userId = HttpContext.Items["UserId"]?.ToString();
-                var Uname = HttpContext.Items["Uname"]?.ToString();
-                var UCode = HttpContext.Items["Code"]?.ToString();
+                var user = UserHelper.GetUserFromContext(HttpContext);
 
-                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权！");
                 UserBiz userBiz = new UserBiz();
-                var list = userBiz.GetUserFavoriteTagByUserId(UCodeLong);
+                var list = userBiz.GetUserFavoriteTagByUserId(user.Code);
                 dic.Add("status", "200");
                 dic.Add("message", "成功");
-                dic.Add("data", list.Select(i=> new { i.UserCode,i.TagCode}).ToList());
+                dic.Add("data", list.Select(i => new
+                {
+                    i.UserCode,
+                    i.TagCode,
+                    i.TagName
+                }).ToList());
             }
             catch (Exception ex)
             {
@@ -341,20 +365,19 @@ namespace WebApplication3.Controllers
             var dic = new Dictionary<string, object>();
             try
             {
-                // 获取用户信息
-                var userId = HttpContext.Items["UserId"]?.ToString();
-                var Uname = HttpContext.Items["Uname"]?.ToString();
-                var UCode = HttpContext.Items["Code"]?.ToString();
-                if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
-                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权！");
-                if (new TagBiz().GetTagByCode(request.TagCode) == null) throw new Exception("标签不存在！");
-                if (new UserBiz().GetUserByCode(UCodeLong) == null) throw new Exception("用户不存在！");
+                var user = UserHelper.GetUserFromContext(HttpContext);
+                var tag = new TagBiz().GetTagByCode(request.data.TagCode);
+                if ( tag == null) throw new Exception("标签不存在！");
 
                 UserBiz userBiz = new UserBiz();
+                var userDislikedTag = userBiz.GetUserDislikedTagByUserId(user.Code,tag.Id);
+                if (userDislikedTag != null) throw new Exception("已添加该标签！");
                 userBiz.AddUserDislikedTag(new UserDislikedTag
                 {
-                    TagCode = request.TagCode,
-                    UserCode = UCodeLong
+                    TagCode = request.data.TagCode,
+                    UserCode = user.Code,
+                    TagName = tag.Name,
+                    UserName = user.Username
                 });
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
@@ -380,25 +403,22 @@ namespace WebApplication3.Controllers
             try
             {
                 // 获取用户信息
-                var userId = HttpContext.Items["UserId"]?.ToString();
-                var Uname = HttpContext.Items["Uname"]?.ToString();
-                var UCode = HttpContext.Items["Code"]?.ToString();
-                if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
-                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权！");
+                var user = UserHelper.GetUserFromContext(HttpContext);
 
                 // 检查作品是否存在
                 var WorkBiz = new WorkBiz();
-                if (WorkBiz.GetWorkByGetWorkCode(request.WorkCode) == null) throw new Exception("作品不存在！");
+                var work = WorkBiz.GetWorkByGetWorkCode(request.data.WorkCode);
+                if (work == null) throw new Exception("作品不存在！");
 
-                // 检查用户是否存在
                 var userBiz = new UserBiz();
-                if (userBiz.GetUserByCode(UCodeLong) == null) throw new Exception("用户不存在！");
 
                 // 添加用户喜欢的作品
                 userBiz.AddUserLikeWork(new UserLikeWork
                 {
-                    WorkCode = request.WorkCode,
-                    UserCode = UCodeLong
+                    WorkCode = request.data.WorkCode,
+                    UserCode = user.Code,
+                    UserName = user.Username,
+                    WorkTitle = work.Title
                 });
 
                 dic.Add("status", 200);
