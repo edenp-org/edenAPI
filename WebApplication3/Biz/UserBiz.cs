@@ -18,6 +18,7 @@ namespace WebApplication3.Biz
         /// <param name="user">用户对象</param>
         public void Add(User user)
         {
+            // 调用数据访问对象的方法添加用户
             dao.Add(user);
         }
 
@@ -28,6 +29,7 @@ namespace WebApplication3.Biz
         /// <returns>用户对象</returns>
         public User GetUserByCode(long code)
         {
+            // 调用数据访问对象的方法根据用户代码获取用户
             return dao.GetUserByCode(code);
         }
 
@@ -38,6 +40,7 @@ namespace WebApplication3.Biz
         /// <returns>用户对象</returns>
         public User GetUserByEmail(string email)
         {
+            // 调用数据访问对象的方法根据用户邮箱获取用户
             return dao.GetUserByEmail(email);
         }
 
@@ -48,6 +51,7 @@ namespace WebApplication3.Biz
         /// <returns>用户对象</returns>
         public User GetUserByUname(string email)
         {
+            // 调用数据访问对象的方法根据用户名获取用户
             return dao.GetUserByUname(email);
         }
 
@@ -59,6 +63,7 @@ namespace WebApplication3.Biz
         /// <returns>是否存在</returns>
         public bool UserExists(string email, string uname)
         {
+            // 调用数据访问对象的方法检查用户是否存在
             return dao.UserExists(email, uname);
         }
 
@@ -68,6 +73,7 @@ namespace WebApplication3.Biz
         /// <returns>用户对象</returns>
         public User GetMaxCodeUser()
         {
+            // 调用数据访问对象的方法获取代码最大的用户
             return dao.GetMaxCodeUser();
         }
 
@@ -81,10 +87,12 @@ namespace WebApplication3.Biz
             var maxCodeUser = GetMaxCodeUser();
             if (maxCodeUser != null && maxCodeUser.Code != 0)
             {
+                // 返回新的用户代码
                 return (maxCodeUser.Code + 1);
             }
             else
             {
+                // 如果没有用户，返回初始代码 1
                 return 1;
             }
         }
@@ -95,6 +103,7 @@ namespace WebApplication3.Biz
         /// <param name="userFavorite">用户喜欢的标签对象</param>
         public void AddUserFavoriteTag(UserFavoriteTag userFavorite)
         {
+            // 调用数据访问对象的方法添加用户喜欢的标签
             dao.AddUserFavoriteTag(userFavorite);
         }
 
@@ -105,11 +114,20 @@ namespace WebApplication3.Biz
         /// <returns>用户喜欢的标签列表</returns>
         public List<UserFavoriteTag> GetUserFavoriteTagByUserId(long userId)
         {
+            // 调用数据访问对象的方法根据用户ID获取用户喜欢的标签
             return dao.GetUserFavoriteTagByUserId(userId);
         }
-        public UserFavoriteTag GetUserFavoriteTagByUserId(long userId,long tagId)
+
+        /// <summary>
+        /// 根据用户ID和标签ID获取用户喜欢的标签
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="tagId">标签ID</param>
+        /// <returns>用户喜欢的标签对象</returns>
+        public UserFavoriteTag GetUserFavoriteTagByUserId(long userId, long tagId)
         {
-            return dao.GetUserFavoriteTagByUserId(userId,tagId);
+            // 调用数据访问对象的方法根据用户ID和标签ID获取用户喜欢的标签
+            return dao.GetUserFavoriteTagByUserId(userId, tagId);
         }
 
         /// <summary>
@@ -118,6 +136,7 @@ namespace WebApplication3.Biz
         /// <param name="userDislikedTag">用户不喜欢的标签对象</param>
         public void AddUserDislikedTag(UserDislikedTag userDislikedTag)
         {
+            // 调用数据访问对象的方法添加用户不喜欢的标签
             dao.AddUserDislikedTag(userDislikedTag);
         }
 
@@ -128,20 +147,43 @@ namespace WebApplication3.Biz
         /// <returns>用户不喜欢的标签列表</returns>
         public List<UserDislikedTag> GetUserDislikedTagByUserId(long userId)
         {
+            // 调用数据访问对象的方法根据用户ID获取用户不喜欢的标签
             return dao.GetUserDislikedTagByUserId(userId);
         }
-        public UserDislikedTag GetUserDislikedTagByUserId(long userId,long tagId)
+
+        /// <summary>
+        /// 根据用户ID和标签ID获取用户不喜欢的标签
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="tagId">标签ID</param>
+        /// <returns>用户不喜欢的标签对象</returns>
+        public UserDislikedTag GetUserDislikedTagByUserId(long userId, long tagId)
         {
-            return dao.GetUserDislikedTagByUserId(userId,tagId);
+            // 调用数据访问对象的方法根据用户ID和标签ID获取用户不喜欢的标签
+            return dao.GetUserDislikedTagByUserId(userId, tagId);
         }
+
+        /// <summary>
+        /// 删除用户不喜欢的标签
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="tagId"></param>
+        public void DeleteUserDislikedTag(long userId, long tagId)
+        {
+            // 调用数据访问对象的方法删除用户不喜欢的标签
+            dao.DeleteUserDislikedTag(userId, tagId);
+        }
+
         /// <summary>
         /// 添加用户喜欢的作品
         /// </summary>
         /// <param name="userLikeWork">要添加的对象</param>
         public void AddUserLikeWork(UserLikeWork userLikeWork)
         {
+            // 调用数据访问对象的方法添加用户喜欢的作品
             dao.AddUserLikeWork(userLikeWork);
         }
+
         /// <summary>
         /// 删除用户喜欢的标签
         /// </summary>
@@ -149,7 +191,19 @@ namespace WebApplication3.Biz
         /// <param name="tagId">Tagode</param>
         public void DeleteUsersLikeTag(long userId, long tagId)
         {
+            // 调用数据访问对象的方法删除用户喜欢的标签
             dao.DeleteUsersLikeTag(userId, tagId);
+        }
+
+        /// <summary>
+        /// 获取用户喜欢的作品
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="workId">作品ID</param>
+        public void GetUserLikeWork(long userId, long workId)
+        {
+            // 调用数据访问对象的方法获取用户喜欢的作品
+            dao.GetUserLikeWork(userId, workId);
         }
     }
 }

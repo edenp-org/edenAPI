@@ -11,6 +11,8 @@ namespace WebApplication3.Controllers
     [Route("User")]
     public class UserController : Controller
     {
+        #region 入参类型
+
         public class LoginRequest
         {
             public LoginRequestData data { get; set; }
@@ -75,6 +77,14 @@ namespace WebApplication3.Controllers
             }
         }
 
+        public class DeleteUserDislikedTagRequest
+        {
+            public DeleteUserDislikedTagRequestData data { get; set; }
+            public class DeleteUserDislikedTagRequestData
+            {
+                public long TagCode { get; set; }
+            }
+        }
         public class AddUserLikeWorkRequest
         {
             public AddUserLikeWorkRequestData data { get; set; }
@@ -83,6 +93,8 @@ namespace WebApplication3.Controllers
                 public long WorkCode { get; set; }
             }
         }
+
+        #endregion
 
         private readonly ICaptcha _captcha;
         private static readonly object _codeLock = new object();
@@ -392,6 +404,64 @@ namespace WebApplication3.Controllers
         }
 
         /// <summary>
+        /// 获取用户不喜欢的标签
+        /// </summary>
+        /// <returns>操作结果</returns>
+        [Authorize(false), HttpGet("GetUserDislikedTag")]
+        public Dictionary<string, object> GetUserDislikedTag()
+        {
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            try
+            {
+                var user = UserHelper.GetUserFromContext(HttpContext);
+                UserBiz userBiz = new UserBiz();
+                var list = userBiz.GetUserDislikedTagByUserId(user.Code);
+
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
+                dic.Add("data", list.Select(i=>new
+                {
+                    i.TagName,
+                    i.UserCode,
+                }));
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// 删除用户不喜欢的标签
+        /// </summary>
+        /// <param name="request">入参</param>
+        /// <returns>出参</returns>
+        [Authorize(false), HttpPost("DeleteUserDislikedTag")]
+        public Dictionary<string, object> DeleteUserDislikedTag(DeleteUserDislikedTagRequest request)
+        {
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            try
+            {
+                var user = UserHelper.GetUserFromContext(HttpContext);
+
+                UserBiz userBiz = new UserBiz();
+                userBiz.DeleteUserDislikedTag(user.Code, request.data.TagCode);
+
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+
+            return dic;
+        }
+
+        /// <summary>
         /// 添加用户喜欢的作品
         /// </summary>
         /// <param name="request">添加作品请求参数</param>
@@ -411,6 +481,7 @@ namespace WebApplication3.Controllers
                 if (work == null) throw new Exception("作品不存在！");
 
                 var userBiz = new UserBiz();
+                userBiz.GetUserLikeWork(user.Code, work.Code);
 
                 // 添加用户喜欢的作品
                 userBiz.AddUserLikeWork(new UserLikeWork
