@@ -175,5 +175,32 @@ namespace WebApplication3.Controllers
             return dic;
         }
 
+        [HttpGet("GetWorksByTagCode")]
+        public Dictionary<string, object> GetWorksByTagCode(long tagCode = 0, int page = 0, int pageSize = 0)
+        {
+            var dic = new Dictionary<string, object>();
+            try
+            {
+                if (tagCode == 0) throw new Exception("没有标签！");
+                var workBiz = new WorkBiz();
+                var workList = workBiz.GetWorksByTagCode(tagCode, page, pageSize);
+                if (workList == null) throw new Exception("未查询到数据！");
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
+                dic.Add("data", workList.Select(a => new
+                {
+                    a.Code,
+                    a.Tags,
+                    a.Description
+                }).ToList());
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+
+            return dic;
+        }
     }
 }
