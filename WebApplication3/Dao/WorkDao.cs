@@ -24,7 +24,7 @@ namespace WebApplication3.Dao
                 .First();
         }
 
-        public List<Work> GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize )
+        public List<Work> GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
         {
             return FreeSqlHelper.Instance.Select<Work>()
                 .Where(w => FreeSqlHelper.Instance.Select<UserFavoriteTag>()
@@ -33,7 +33,19 @@ namespace WebApplication3.Dao
                             !FreeSqlHelper.Instance.Select<UserDislikedTag>()
                                 .Where(ud => ud.UserCode == userCode)
                                 .Any(ud => ud.TagCode == w.Code))
+                .OrderByDescending(d => d.CreatedAt)
                 .Page(page, pageSize)
+                .ToList();
+        }
+
+        public List<Work> GetWorksByTagCode(long tagCode, int page = 0, int pageSize = 0)
+        {
+            return FreeSqlHelper.Instance.Select<Work>()
+                .Where(w => FreeSqlHelper.Instance.Select<WorkAndTag>()
+                    .Where(wt => wt.TagId == tagCode)
+                    .Any(wt => wt.WorkId == w.Code))
+                .OrderByDescending(w => w.CreatedAt) // 排序
+                .Page(page, pageSize) // 分页
                 .ToList();
         }
     }

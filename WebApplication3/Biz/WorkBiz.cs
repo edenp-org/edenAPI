@@ -28,7 +28,7 @@ namespace WebApplication3.Biz
             long maxCode = 0;
             if (maxCodeWork != null && maxCodeWork.Code != 0)
             {
-                return maxCode + 1; // 生成新的 Code，格式为8位数字
+                return maxCodeWork.Code + 1; // 生成新的 Code，格式为8位数字
             }
             else
             {
@@ -39,6 +39,11 @@ namespace WebApplication3.Biz
         public List<Work> GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
         {
             return workDao.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
+        }
+
+        public List<Work> GetWorksByTagCode(long tagCode , int page = 0, int pageSize = 0)
+        {
+           return workDao.GetWorksByTagCode(tagCode, page, pageSize);
         }
     }
 }

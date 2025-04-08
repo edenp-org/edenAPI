@@ -14,6 +14,7 @@ namespace WebApplication3.Foundation.Helper
             _instance = new FreeSqlBuilder()
                 .UseConnectionString(DataType.MySql, $"Server={IP};Database={DBNAME};User={DBUSER};Password={DBPASSWORD};")
                 .UseAutoSyncStructure(true) // 自动同步实体结构到数据库
+                .UseMonitorCommand(cmd => Console.WriteLine($"Sql：{cmd.CommandText}"))
                 .Build();
         }
 
