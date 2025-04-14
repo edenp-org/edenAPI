@@ -33,7 +33,10 @@ namespace WebApplication3.Biz
             tagDao.AddWorkAndTag(tagId, workId);
         }
 
-
+        public List<Tag> GetAllTag(int page = 0, int pageSize = 0)
+        {
+            return tagDao.GetAllTag(page, pageSize);
+        }
         public long GetNewTagCode()
         {
             long newCode = 0;

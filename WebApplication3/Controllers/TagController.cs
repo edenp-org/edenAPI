@@ -100,5 +100,35 @@ namespace WebApplication3.Controllers
 
             return dic;
         }
+
+        /// <summary>
+        /// 获取所有标签
+        /// </summary>
+        /// <param name="page">第几页</param>
+        /// <param name="pageSize">每页多少</param>
+        /// <returns>Tag信息</returns>
+        [HttpGet("GetALLTag")]
+        public Dictionary<string, object> GetALLTags(int page = 0, int pageSize = 0)
+        {
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            try
+            {
+                TagBiz tagBiz = new TagBiz();
+                var tags = tagBiz.GetAllTag(page, pageSize);
+                if (tags == null) throw new Exception("未查询到数据！");
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
+                dic.Add("data", tags.Select(a => new { a.Code, a.Name, a.CreatedAt }));
+            }
+            catch (Exception e)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", e.Message);
+            }
+
+            return dic;
+        }
+
+
     }
 }

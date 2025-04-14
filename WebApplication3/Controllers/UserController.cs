@@ -212,6 +212,7 @@ namespace WebApplication3.Controllers
         /// </summary>
         /// <param name="request">注册请求参数</param>
         /// <returns>注册结果</returns>
+        [HttpPost("Register")]
         public Dictionary<string, object> Register([FromBody] RegisterRequest request)
         {
             var dic = new Dictionary<string, object>();

@@ -38,6 +38,14 @@ namespace WebApplication3.Dao
                 .ToList();
         }
 
+        public List<Work> GetWorkByCollectionCode(long collectionCode)
+        {
+            return FreeSqlHelper.Instance.Select<Work>()
+                .Where(w => w.CollectionCode == collectionCode)
+                .OrderByDescending(w => w.CollectionOrder)
+                .ToList();
+        }
+
         public List<Work> GetWorksByTagCode(long tagCode, int page = 0, int pageSize = 0)
         {
             return FreeSqlHelper.Instance.Select<Work>()
@@ -47,6 +55,23 @@ namespace WebApplication3.Dao
                 .OrderByDescending(w => w.CreatedAt) // 排序
                 .Page(page, pageSize) // 分页
                 .ToList();
+        }
+
+        public Work GetCollectionOrderMax(long collectionCode)
+        {
+            return FreeSqlHelper.Instance.Select<Work>()
+                .Where(w=>w.CollectionOrder == collectionCode)
+                .OrderByDescending(w => w.CollectionOrder)
+                .First();
+        }
+
+        public void AddWorkToCollection(long collectionCode,long workCode,long  orderCode)
+        {
+            FreeSqlHelper.Instance.Update<Work>()
+                .Where(w=>w.Code == workCode)
+                .Set(w=>w.CollectionCode,collectionCode)
+                .Set(w=>w.CollectionOrder,orderCode)
+                .ExecuteAffrows();
         }
     }
 }

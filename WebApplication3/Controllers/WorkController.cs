@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -175,6 +176,14 @@ namespace WebApplication3.Controllers
             return dic;
         }
 
+        /// <summary>
+        /// 根据TagCode获取作品
+        /// </summary>
+        /// <param name="tagCode">TagCode</param>
+        /// <param name="page">第几页</param>
+        /// <param name="pageSize">页面大小</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         [HttpGet("GetWorksByTagCode")]
         public Dictionary<string, object> GetWorksByTagCode(long tagCode = 0, int page = 0, int pageSize = 0)
         {
@@ -193,6 +202,30 @@ namespace WebApplication3.Controllers
                     a.Tags,
                     a.Description
                 }).ToList());
+            }
+            catch (Exception ex)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+
+            return dic;
+        }
+
+        [HttpPost("GetExamineResult")]
+        public Dictionary<string, object> GetExamineResult(Dictionary<string,object> pairs)
+        {
+            var dic = new Dictionary<string, object>();
+            try
+            {
+                if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
+                    throw new Exception("没有入参！");
+                var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
+                if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
+                    throw new Exception("请输入内容！");
+                TextModerationAutoRouteHelper.Examine(content.ToString());
+                dic.Add("status", 200);
+                dic.Add("message", "成功");
             }
             catch (Exception ex)
             {
