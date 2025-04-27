@@ -15,7 +15,7 @@ namespace WebApplication3.Models.DB
         [Required]
         public string UserName { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     }
 }

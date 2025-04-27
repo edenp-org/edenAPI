@@ -205,5 +205,6 @@ namespace WebApplication3.Biz
             // 调用数据访问对象的方法获取用户喜欢的作品
             dao.GetUserLikeWork(userId, workId);
         }
+        
     }
 }

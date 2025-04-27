@@ -50,10 +50,30 @@ namespace WebApplication3.Models.DB
         /// 标签
         /// </summary>
         public string Tags { get; set; }
+        /// <summary>
+        /// 是否审核
+        /// </summary>
+
+        public int IsToExamine { get; set; }
+
+        /// <summary>
+        /// 审核时间
+        /// </summary>
+        public DateTime ExamineDate { get; set; }
 
         /// <summary>
         /// 作品编码
         /// </summary>
         public long Code { get; set; }
+
+        /// <summary>
+        /// 合集Code，为0表示不属于任何合集
+        /// </summary>
+        public long CollectionCode { get; set; }
+
+        /// <summary>
+        /// 合集排序
+        /// </summary>
+        public long CollectionOrder { get; set; }
     }
 }

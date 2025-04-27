@@ -53,6 +53,14 @@ namespace WebApplication3.Dao
                 .First();
         }
 
+        public List<Tag> GetAllTag(int page = 0, int pageSize = 0)
+        {
+            return FreeSqlHelper.Instance.Select<Tag>()
+                .OrderByDescending(t => t.CreatedAt)
+                .Page(page, pageSize)
+                .ToList();
+        }
+
         public bool TagCodeExists(long code)
         {
             return FreeSqlHelper.Instance.Select<Tag>()

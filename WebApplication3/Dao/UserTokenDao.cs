@@ -13,7 +13,7 @@ namespace WebApplication3.Models.DB
         {
             return FreeSqlHelper.Instance
                 .Select<UserToken>()
-                .Where(u => u.Username == user && u.Purpose == Purpose && u.Expiration >= DateTime.Now)
+                .Where(u => u.Username == user && u.Purpose == Purpose && u.Expiration >= DateTime.UtcNow)
                 .ToList();
         }
 
