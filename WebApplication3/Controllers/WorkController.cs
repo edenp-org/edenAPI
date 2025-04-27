@@ -80,8 +80,8 @@ namespace WebApplication3.Controllers
                         Title = title.ToString(),
                         Description = description.ToString(),
                         AuthorCode = UCodeLong,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
                         AuthorName = user.Username,
                         Tags = tagList.ToJsonString(),
                         Code = workBiz.GetNewWorkCode()
@@ -114,13 +114,13 @@ namespace WebApplication3.Controllers
         /// <param name="workId">作品ID</param>
         /// <returns>返回作品信息</returns>
         [HttpGet("GetWork")]
-        public Dictionary<string, object> GetWork(long workId = 0)
+        public Dictionary<string, object> GetWork(long workCode = 0)
         {
             var dic = new Dictionary<string, object>();
             try
             {
                 var workBiz = new WorkBiz();
-                var work = workBiz.GetWorkByGetWorkCode(workId);
+                var work = workBiz.GetWorkByGetWorkCode(workCode);
                 if (work == null) throw new Exception("未查询到数据！");
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
@@ -200,7 +200,8 @@ namespace WebApplication3.Controllers
                 {
                     a.Code,
                     a.Tags,
-                    a.Description
+                    a.Description,
+                    a.Title
                 }).ToList());
             }
             catch (Exception ex)

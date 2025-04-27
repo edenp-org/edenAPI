@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AlibabaCloud.SDK.Green20220302" Version="2.20.4" />
     <PackageReference Include="dotnetCampus.Configurations" Version="1.7.0" />
+    <PackageReference Include="FreeRedis" Version="1.3.6" />
     <PackageReference Include="FreeSql.All" Version="3.5.102" />
     <PackageReference Include="Lazy.Captcha.Core" Version="2.0.9" />
     <PackageReference Include="MailKit" Version="4.10.0" />

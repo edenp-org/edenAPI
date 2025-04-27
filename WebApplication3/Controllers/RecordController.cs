@@ -41,7 +41,7 @@ namespace WebApplication3.Controllers
         //        {
         //            Host = Host,
         //            Url = URL,
-        //            VisitTime = DateTime.Now,
+        //            VisitTime = DateTime.UtcNow,
         //            UserId = UUID
         //        }).ExecuteAffrows();
         //

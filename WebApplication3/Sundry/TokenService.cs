@@ -12,7 +12,6 @@ namespace WebApplication3.Sundry
         private static readonly string _secretKey = ConfigHelper.GetString("TokenKey");
         private static readonly string _issuer = ConfigHelper.GetString("TokenIssuer");
         private static readonly string _audience = ConfigHelper.GetString("TokenAudience");
-        private static readonly int _expirationHours = ConfigHelper.GetInt("TokenExpirationHours");
 
         /// <summary>
         /// 生成JWT Token
@@ -21,20 +20,22 @@ namespace WebApplication3.Sundry
         /// <param name="role">用户角色</param>
         /// <param name="purpose">Token的作用</param>
         /// <returns>生成的Token字符串</returns>
-        public static string GenerateToken(string username, string role, string purpose)
+        public static string GenerateToken(string username, string role, string purpose,long UCode, DateTime expires)
         {
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_secretKey);
             var claims = new[]
             {
                     new Claim(ClaimTypes.Name, username),
                     new Claim(ClaimTypes.Role, role),
-                    new Claim("Purpose", purpose)
+                    new Claim("Purpose", purpose),
+                    new Claim("UCode", UCode.ToString())
                 };
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(_expirationHours),
+                Expires = expires,
                 Issuer = _issuer,
                 Audience = _audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

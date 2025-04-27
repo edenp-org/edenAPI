@@ -1,4 +1,5 @@
-﻿using Lazy.Captcha.Core;
+﻿using System.Security.Claims;
+using Lazy.Captcha.Core;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
@@ -16,6 +17,7 @@ namespace WebApplication3.Controllers
         public class LoginRequest
         {
             public LoginRequestData data { get; set; }
+
             public class LoginRequestData
             {
                 public string Password { get; set; }
@@ -29,6 +31,7 @@ namespace WebApplication3.Controllers
         public class SendEmailVerificationCodeRequest
         {
             public SendEmailVerificationCodeRequestData data { get; set; }
+
             public class SendEmailVerificationCodeRequestData
             {
                 public string Email { get; set; }
@@ -40,6 +43,7 @@ namespace WebApplication3.Controllers
         public class RegisterRequest
         {
             public RegisterRequestData data { get; set; }
+
             public class RegisterRequestData
             {
                 public string Email { get; set; }
@@ -53,6 +57,7 @@ namespace WebApplication3.Controllers
         public class AddUsersLikeTagRequest
         {
             public AddUsersLikeTagRequestData data { get; set; }
+
             public class AddUsersLikeTagRequestData
             {
                 public long TagCode { get; set; }
@@ -62,6 +67,7 @@ namespace WebApplication3.Controllers
         public class DeleteUsersLikeTagRequest
         {
             public DeleteUsersLikeTagRequestRequestData data { get; set; }
+
             public class DeleteUsersLikeTagRequestRequestData
             {
                 public long TagCode { get; set; }
@@ -71,6 +77,7 @@ namespace WebApplication3.Controllers
         public class AddUserDislikedTagRequest
         {
             public AddUserDislikedTagRequestData data { get; set; }
+
             public class AddUserDislikedTagRequestData
             {
                 public long TagCode { get; set; }
@@ -80,14 +87,17 @@ namespace WebApplication3.Controllers
         public class DeleteUserDislikedTagRequest
         {
             public DeleteUserDislikedTagRequestData data { get; set; }
+
             public class DeleteUserDislikedTagRequestData
             {
                 public long TagCode { get; set; }
             }
         }
+
         public class AddUserLikeWorkRequest
         {
             public AddUserLikeWorkRequestData data { get; set; }
+
             public class AddUserLikeWorkRequestData
             {
                 public long WorkCode { get; set; }
@@ -135,22 +145,40 @@ namespace WebApplication3.Controllers
                         EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(request.data.Password) + user.Confuse)))
                     throw new Exception("用户名或邮箱或密码不存在！");
 
+                int expirationHours = ConfigHelper.GetInt("TokenExpirationHours");
+                var refreshTokenExpires =  DateTime.UtcNow.AddHours(expirationHours);
+                var accessTokenExpires =  DateTime.UtcNow.AddHours(1);
+
                 // 生成Token
-                var token = TokenService.GenerateToken(user.Username, user.Role.ToString(), "登录");
+                var refreshToken = TokenService.GenerateToken(user.Username, user.Role.ToString(), "refreshToken", user.Code, refreshTokenExpires);
+                var accessToken = TokenService.GenerateToken(user.Username, user.Role.ToString(), "accessToken", user.Code, accessTokenExpires);
 
                 // 保存Token
                 userTokenBiz.Add(new UserToken
                 {
-                    Expiration = DateTime.Now.AddHours(ConfigHelper.GetInt("TokenExpirationHours")),
-                    CreatedAt = DateTime.Now,
-                    Purpose = "登录",
-                    Token = token,
+                    Expiration = DateTime.UtcNow.AddHours(ConfigHelper.GetInt("TokenExpirationHours")),
+                    CreatedAt = DateTime.UtcNow,
+                    Purpose = "refreshToken",
+                    Token = refreshToken,
                     Username = user.Username
+                });
+
+                var accessTokenExpiresTimeSeconds = accessTokenExpires.ToUnixTimeSeconds();
+
+                RedisHelper.Set(user.Code + accessTokenExpiresTimeSeconds.ToString(), accessToken, (int)(accessTokenExpires - DateTime.UtcNow).TotalSeconds);
+
+                // 设置Cookie
+                HttpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+                {
+                    HttpOnly = true, // 仅允许通过HTTP访问，防止脚本访问
+                    Secure = false, // 仅在HTTPS下传输
+                    SameSite = SameSiteMode.Strict, // 限制跨站点请求
+                    Expires = DateTimeOffset.UtcNow.AddMonths(1) // 设置过期时间
                 });
 
                 dic.Add("status", 200);
                 dic.Add("message", "登录成功！");
-                dic.Add("data", token);
+                dic.Add("data", accessToken);
             }
             catch (Exception ex)
             {
@@ -160,6 +188,67 @@ namespace WebApplication3.Controllers
 
             return dic;
         }
+
+
+        /// <summary>
+        /// 刷新令牌
+        /// </summary>
+        /// <returns>刷新后的访问令牌</returns>
+        [HttpPost("RefreshToken")]
+        public Dictionary<string, object> RefreshToken()
+        {
+            var dic = new Dictionary<string, object>();
+            try
+            {
+                // 从请求头中获取刷新令牌
+                if (!HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+                {
+                    throw new Exception("未提供刷新令牌！");
+                }
+
+                var claimsPrincipal = TokenService.ValidateToken(refreshToken);
+                if (claimsPrincipal == null) throw new Exception("鉴权失败！");
+
+                var exp = claimsPrincipal.FindFirst(ClaimTypes.Name);
+                var UCode = claimsPrincipal.FindFirst("UCode");
+
+                if (exp == null || UCode == null ||!long.TryParse(UCode.Value,out long _result)) throw new Exception("鉴权失败！");
+
+                var userTokenBiz = new UserTokenBiz();
+                // 验证刷新令牌是否存在并有效
+                var userToken = userTokenBiz.GetTokenByUserAndPurpose(exp.Value,"refreshToken");
+                if (userToken == null || userToken.Where(e=>e.Expiration >= DateTime.UtcNow).Count() <= 0)
+                {
+                    throw new Exception("刷新令牌无效或已过期！");
+                }
+
+                // 获取用户信息
+                var userBiz = new UserBiz();
+                var user = userBiz.GetUserByCode(_result);
+                if (user == null)
+                {
+                    throw new Exception("用户不存在！");
+                }
+
+                // 生成新地访问令牌
+                var accessTokenExpires =  DateTime.UtcNow.AddHours(1);
+                var accessToken = TokenService.GenerateToken(user.Username, user.Role.ToString(), "accessToken", user.Code, accessTokenExpires);
+
+                RedisHelper.Set(user.Code + accessTokenExpires.ToUnixTimeSeconds().ToString(), accessToken, (int)(accessTokenExpires - DateTime.UtcNow).TotalSeconds);
+                HttpContext.Response.StatusCode = 401;
+                dic.Add("message", "令牌刷新成功！");
+                dic.Add("data", accessToken);
+            }
+            catch (Exception ex)
+            {
+                HttpContext.Response.StatusCode = 401;
+                dic.Add("status", 400);
+                dic.Add("message", ex.Message);
+            }
+
+            return dic;
+        }
+
 
         /// <summary>
         /// 发送邮箱验证码
@@ -185,8 +274,8 @@ namespace WebApplication3.Controllers
                 var userTokenBiz = new UserTokenBiz();
                 userTokenBiz.Add(new UserToken
                 {
-                    Expiration = DateTime.Now.AddMinutes(5),
-                    CreatedAt = DateTime.Now,
+                    Expiration = DateTime.UtcNow.AddMinutes(5),
+                    CreatedAt = DateTime.UtcNow,
                     Purpose = "注册",
                     Token = token,
                     Username = request.data.Email
@@ -440,7 +529,7 @@ namespace WebApplication3.Controllers
         /// <param name="request">入参</param>
         /// <returns>出参</returns>
         [Authorize(false), HttpPost("DeleteUserDislikedTag")]
-        public Dictionary<string, object> DeleteUserDislikedTag(DeleteUserDislikedTagRequest request)
+        public Dictionary<string, object> DeleteUserDislikedTag([FromBody] DeleteUserDislikedTagRequest request)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
             try

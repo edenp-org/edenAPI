@@ -43,7 +43,7 @@ namespace WebApplication3.Controllers
                 {
                     tag = new Tag()
                     {
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow,
                         Name = Name,
                         UId = int.Parse(userId),
                         Code = tagBiz.GetNewTagCode()
