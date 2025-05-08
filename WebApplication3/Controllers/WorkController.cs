@@ -214,19 +214,25 @@ namespace WebApplication3.Controllers
         }
 
         [HttpPost("GetExamineResult")]
-        public Dictionary<string, object> GetExamineResult(Dictionary<string,object> pairs)
+        public Dictionary<string,object> GetExamineResult(Dictionary<string,object> pairs)
         {
-            var dic = new Dictionary<string, object>();
+            Dictionary<string, object> dic = new Dictionary<string, object>();
             try
             {
-                if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
+                if (!pairs.TryGetValue("data", out object dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
                     throw new Exception("没有入参！");
-                var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
-                if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
+                Dictionary<string, object> data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
+                if (!data.TryGetValue("content", out object content) || string.IsNullOrEmpty(content.ToString()))
                     throw new Exception("请输入内容！");
-                TextModerationAutoRouteHelper.Examine(content.ToString());
+                TextModerationAutoRouteHelper textModerationAutoRouteHelper = new TextModerationAutoRouteHelper();
+                TextModerationAutoRouteHelper.TextModerationResponse textModerationResponse = textModerationAutoRouteHelper.Examine(content.ToString());
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
+                dic.Add("data",textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>());
+                textModerationResponse.choices[0].message.content = "";
+                textModerationResponse.id = "";
+                dic.Add("textModerationResponse",textModerationResponse);
+                return dic;
             }
             catch (Exception ex)
             {

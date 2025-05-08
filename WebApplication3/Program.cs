@@ -25,7 +25,6 @@ namespace WebApplication3
                     });
             });
 
-
             builder.Services.AddCaptcha(builder.Configuration, option =>
             {
                 option.CaptchaType = CaptchaType.NUMBER; // 验证码类型
