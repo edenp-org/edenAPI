@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
+using WebApplication3.Foundation.Exceptions;
 using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
@@ -42,9 +43,9 @@ public class CollectionController: Controller
         try
         {
             // 检查输入参数
-            if (request == null) throw new Exception("没有入参！");
-            if (string.IsNullOrEmpty(request.data.Name)) throw new Exception("没有合集名称！");
-            if (string.IsNullOrEmpty(request.data.Description)) throw new Exception("没有合集简介！");
+            if (request == null) throw new CustomException("没有入参！");
+            if (string.IsNullOrEmpty(request.data.Name)) throw new CustomException("没有合集名称！");
+            if (string.IsNullOrEmpty(request.data.Description)) throw new CustomException("没有合集简介！");
 
             // 获取当前用户信息
             var user = UserHelper.GetUserFromContext(HttpContext);
@@ -67,12 +68,16 @@ public class CollectionController: Controller
             dic.Add("status", 200); // 成功状态
             dic.Add("message", "成功");
         }
-        catch (Exception e)
+        catch (CustomException e)
         {
-            dic.Add("status", 400); // 错误状态
+            dic.Add("status", 400);
             dic.Add("message", e.Message);
         }
-
+        catch (Exception e)
+        {
+            dic.Add("status", 400);
+            dic.Add("message", "系统错误！错误代码！" + e.HResult);
+        }
         return dic;
     }
 
@@ -88,10 +93,10 @@ public class CollectionController: Controller
         try
         {
             // 检查输入参数
-            if (!pairs.TryGetValue("data", out object dataObj)) throw new Exception("没有入参！");
+            if (!pairs.TryGetValue("data", out object dataObj)) throw new CustomException("没有入参！");
             var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
-            if (!data.TryGetValue("CollectionCode", out string collectionCode)) throw new Exception("没有合集代码");
-            if (!data.TryGetValue("WorkCode", out string workCode)) throw new Exception("没有作品代码");
+            if (!data.TryGetValue("CollectionCode", out string collectionCode)) throw new CustomException("没有合集代码");
+            if (!data.TryGetValue("WorkCode", out string workCode)) throw new CustomException("没有作品代码");
             if (!data.TryGetValue("CollectionOrder", out string CollectionOrder)) CollectionOrder = "0";
 
             // 获取当前用户信息
@@ -101,7 +106,7 @@ public class CollectionController: Controller
             WorkBiz workBiz = new WorkBiz();
 
             // 检查作品是否存在
-            if (workBiz.GetWorkByGetWorkCode(long.Parse(workCode)) == null) throw new Exception("没有查询到作品");
+            if (workBiz.GetWorkByGetWorkCode(long.Parse(workCode)) == null) throw new CustomException("没有查询到作品");
 
             lock (_lock)
             {
@@ -112,10 +117,15 @@ public class CollectionController: Controller
             dic.Add("status", 200); // 成功状态
             dic.Add("message", "成功");
         }
-        catch (Exception ex)
+        catch (CustomException e)
         {
-            dic.Add("status", 400); // 错误状态
-            dic.Add("message", ex.Message);
+            dic.Add("status", 400);
+            dic.Add("message", e.Message);
+        }
+        catch (Exception e)
+        {
+            dic.Add("status", 400);
+            dic.Add("message", "系统错误！错误代码！" + e.HResult);
         }
         return dic;
     }
@@ -132,7 +142,7 @@ public class CollectionController: Controller
         try
         {
             // 检查输入参数
-            if (collectionCode == 0) throw new Exception("没有合集代码！");
+            if (collectionCode == 0) throw new CustomException("没有合集代码！");
 
             var workBiz = new WorkBiz();
             CollectionBiz collectionBiz = new CollectionBiz();
@@ -142,7 +152,7 @@ public class CollectionController: Controller
 
             // 获取作品列表
             var workList = collectionBiz.GetWorkByCollectionCode(collectionCode);
-            if (workList == null) throw new Exception("未查询到数据！");
+            if (workList == null) throw new CustomException("未查询到数据！");
 
             dic.Add("status", 200); // 成功状态
             dic.Add("message", "成功");
@@ -154,10 +164,15 @@ public class CollectionController: Controller
                 a.CollectionOrder // 合集排序
             }).ToList());
         }
+        catch (CustomException e)
+        {
+            dic.Add("status", 400);
+            dic.Add("message", e.Message);
+        }
         catch (Exception e)
         {
-            dic.Add("status", 400); // 错误状态
-            dic.Add("message", e.Message);
+            dic.Add("status", 400);
+            dic.Add("message", "系统错误！错误代码！" + e.HResult);
         }
         return dic;
     }

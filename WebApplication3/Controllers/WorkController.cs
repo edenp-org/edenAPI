@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
+using WebApplication3.Foundation.Exceptions;
 using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
@@ -36,23 +37,23 @@ namespace WebApplication3.Controllers
             {
                 // 验证输入参数
                 if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
-                    throw new Exception("没有入参！");
+                    throw new CustomException("没有入参！");
                 var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
                 if (!data.TryGetValue("title", out var title) || string.IsNullOrEmpty(title.ToString()))
-                    throw new Exception("请输入标题！");
+                    throw new CustomException("请输入标题！");
                 if (!data.TryGetValue("description", out var description) ||
-                    string.IsNullOrEmpty(description.ToString())) throw new Exception("请输入介绍！");
+                    string.IsNullOrEmpty(description.ToString())) throw new CustomException("请输入介绍！");
                 if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
-                    throw new Exception("请输入内容！");
+                    throw new CustomException("请输入内容！");
                 if (!data.TryGetValue("Tags", out var tags) || string.IsNullOrEmpty(tags.ToString()))
-                    throw new Exception("没有标签！");
+                    throw new CustomException("没有标签！");
 
                 // 获取用户信息
                 var userId = HttpContext.Items["UserId"]?.ToString();
                 var Uname = HttpContext.Items["Uname"]?.ToString();
                 var UCode = HttpContext.Items["Code"]?.ToString();
-                if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
-                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权");
+                if (string.IsNullOrEmpty(userId)) throw new CustomException("用户未授权！");
+                if (!long.TryParse(UCode, out long UCodeLong)) throw new CustomException("用户未授权");
                 // 处理标签
                 var tagList = tags.ToString().FromJsonString<List<string>>();
                 var tagBiz = new TagBiz();
@@ -60,9 +61,9 @@ namespace WebApplication3.Controllers
 
                 tagList.ForEach(tagName =>
                 {
-                    if (string.IsNullOrEmpty(tagName)) throw new Exception("标签不能为空！");
+                    if (string.IsNullOrEmpty(tagName)) throw new CustomException("标签不能为空！");
                     var tag = tagBiz.GetTagByName(tagName);
-                    if (tag == null) throw new Exception($"标签“{tagName}”不存在！");
+                    if (tag == null) throw new CustomException($"标签“{tagName}”不存在！");
                     tagCodes.Add(tag.Code);
                 });
 
@@ -99,10 +100,15 @@ namespace WebApplication3.Controllers
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
             }
-            catch (Exception ex)
+            catch (CustomException e)
             {
                 dic.Add("status", 400);
-                dic.Add("message", ex.Message);
+                dic.Add("message", e.Message);
+            }
+            catch (Exception e)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", "系统错误！错误代码:" + e.HResult);
             }
 
             return dic;
@@ -121,16 +127,21 @@ namespace WebApplication3.Controllers
             {
                 var workBiz = new WorkBiz();
                 var work = workBiz.GetWorkByGetWorkCode(workCode);
-                if (work == null) throw new Exception("未查询到数据！");
+                if (work == null) throw new CustomException("未查询到数据！");
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
                 dic.Add("data",
                     new { work, url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT") });
             }
-            catch (Exception ex)
+            catch (CustomException e)
             {
                 dic.Add("status", 400);
-                dic.Add("message", ex.Message);
+                dic.Add("message", e.Message);
+            }
+            catch (Exception e)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", "系统错误！错误代码:" + e.HResult);
             }
 
             return dic;
@@ -152,12 +163,12 @@ namespace WebApplication3.Controllers
                 var uCode = HttpContext.Items["Code"]?.ToString();
                 if (string.IsNullOrEmpty(uCode) || !long.TryParse(uCode, out long userCode))
                 {
-                    throw new Exception("用户未授权！");
+                    throw new CustomException("用户未授权！");
                 }
 
                 var workBiz = new WorkBiz();
                 var workList = workBiz.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
-                if (workList == null) throw new Exception("未查询到数据！");
+                if (workList == null) throw new CustomException("未查询到数据！");
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
                 dic.Add("data", workList.Select(a => new
@@ -167,10 +178,15 @@ namespace WebApplication3.Controllers
                     a.Description
                 }));
             }
-            catch (Exception ex)
+            catch (CustomException e)
             {
                 dic.Add("status", 400);
-                dic.Add("message", ex.Message);
+                dic.Add("message", e.Message);
+            }
+            catch (Exception e)
+            {
+                dic.Add("status", 400);
+                dic.Add("message", "系统错误！错误代码:" + e.HResult);
             }
 
             return dic;
@@ -190,10 +206,10 @@ namespace WebApplication3.Controllers
             var dic = new Dictionary<string, object>();
             try
             {
-                if (tagCode == 0) throw new Exception("没有标签！");
+                if (tagCode == 0) throw new CustomException("没有标签！");
                 var workBiz = new WorkBiz();
                 var workList = workBiz.GetWorksByTagCode(tagCode, page, pageSize);
-                if (workList == null) throw new Exception("未查询到数据！");
+                if (workList == null) throw new CustomException("未查询到数据！");
                 dic.Add("status", 200);
                 dic.Add("message", "成功");
                 dic.Add("data", workList.Select(a => new
@@ -204,40 +220,15 @@ namespace WebApplication3.Controllers
                     a.Title
                 }).ToList());
             }
-            catch (Exception ex)
+            catch (CustomException e)
             {
                 dic.Add("status", 400);
-                dic.Add("message", ex.Message);
+                dic.Add("message", e.Message);
             }
-
-            return dic;
-        }
-
-        [HttpPost("GetExamineResult")]
-        public Dictionary<string,object> GetExamineResult(Dictionary<string,object> pairs)
-        {
-            Dictionary<string, object> dic = new Dictionary<string, object>();
-            try
-            {
-                if (!pairs.TryGetValue("data", out object dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
-                    throw new Exception("没有入参！");
-                Dictionary<string, object> data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
-                if (!data.TryGetValue("content", out object content) || string.IsNullOrEmpty(content.ToString()))
-                    throw new Exception("请输入内容！");
-                TextModerationAutoRouteHelper textModerationAutoRouteHelper = new TextModerationAutoRouteHelper();
-                TextModerationAutoRouteHelper.TextModerationResponse textModerationResponse = textModerationAutoRouteHelper.Examine(content.ToString());
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data",textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>());
-                textModerationResponse.choices[0].message.content = "";
-                textModerationResponse.id = "";
-                dic.Add("textModerationResponse",textModerationResponse);
-                return dic;
-            }
-            catch (Exception ex)
+            catch (Exception e)
             {
                 dic.Add("status", 400);
-                dic.Add("message", ex.Message);
+                dic.Add("message", "系统错误！错误代码:" + e.HResult);
             }
 
             return dic;

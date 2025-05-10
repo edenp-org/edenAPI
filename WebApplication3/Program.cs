@@ -24,7 +24,7 @@ namespace WebApplication3
                             .AllowAnyMethod();
                     });
             });
-
+            NLogHelper.Debug("系统启动中....");
             builder.Services.AddCaptcha(builder.Configuration, option =>
             {
                 option.CaptchaType = CaptchaType.NUMBER; // 验证码类型
