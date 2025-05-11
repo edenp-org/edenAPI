@@ -223,5 +223,24 @@ namespace WebApplication3.Dao
                 .Where(i => i.UserCode == userId && i.WorkCode == workId)
                 .ExecuteAffrows();
         }
+
+        public void IncreasExamineCount(long userCode,int incrementBy)
+        {
+            var cont = FreeSqlHelper.Instance
+                .Update<User>()
+                .Set(u => u.ExamineCount + incrementBy)
+                .Set(u => u.LastExamineTime, DateTime.UtcNow)
+                .Where(u => u.Code == userCode)
+                .ExecuteAffrows();
+        }
+
+        public void ResetExamineCount(long userCode)
+        {
+            FreeSqlHelper.Instance
+                .Update<User>()
+                .Set(u => u.ExamineCount, 0)
+                .Where(u => u.Code == userCode)
+                .ExecuteAffrows();
+        }
     }
 }

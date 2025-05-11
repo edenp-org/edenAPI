@@ -22,8 +22,6 @@ namespace WebApplication3.Foundation
         {
             try
             {
-
-
                 if (context.HttpContext.Request.Headers["Authorization"].Count == 0)
                 {
                     context.Result = new JsonResult(new
@@ -66,7 +64,7 @@ namespace WebApplication3.Foundation
                 context.Result = new JsonResult(new
                 {
                     status = 400,
-                    message = $"鉴权失败！错误代码：0x{e.HResult:X}"
+                    message = $"鉴权失败！错误代码：{e.HResult}"
                 });
             }
         }

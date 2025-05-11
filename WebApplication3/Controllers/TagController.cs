@@ -26,47 +26,33 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> AddTag(Dictionary<string, object> pairs)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
-            try
+            // 检查输入参数
+            if (!pairs.TryGetValue("data", out object dataObj)) throw new CustomException("没有入参！");
+            var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
+            if (!data.TryGetValue("Name", out string Name)) throw new CustomException("没有Tag名");
+            var userId = HttpContext.Items["UserId"]?.ToString();
+
+            TagBiz tagBiz = new TagBiz();
+            // 检查标签是否已存在
+            if (tagBiz.GetTagByName(Name) != null) throw new CustomException("该Tag已存在");
+
+            Tag tag;
+            // 使用锁确保线程安全
+            lock (_lock)
             {
-                // 检查输入参数
-                if (!pairs.TryGetValue("data", out object dataObj)) throw new CustomException("没有入参！");
-                var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
-                if (!data.TryGetValue("Name", out string Name)) throw new CustomException("没有Tag名");
-                var userId = HttpContext.Items["UserId"]?.ToString();
-
-                TagBiz tagBiz = new TagBiz();
-                // 检查标签是否已存在
-                if (tagBiz.GetTagByName(Name) != null) throw new CustomException("该Tag已存在");
-
-                Tag tag;
-                // 使用锁确保线程安全
-                lock (_lock)
+                tag = new Tag()
                 {
-                    tag = new Tag()
-                    {
-                        CreatedAt = DateTime.UtcNow,
-                        Name = Name,
-                        UId = int.Parse(userId),
-                        Code = tagBiz.GetNewTagCode()
-                    };
-                    tag = tagBiz.AddTag(tag);
-                }
-
-                dic.Add("data", tag);
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-            }
-            catch (CustomException e)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", e.Message);
-            }
-            catch (Exception e)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", "系统错误！错误代码:" + e.HResult);
+                    CreatedAt = DateTime.UtcNow,
+                    Name = Name,
+                    UId = int.Parse(userId),
+                    Code = tagBiz.GetNewTagCode()
+                };
+                tag = tagBiz.AddTag(tag);
             }
 
+            dic.Add("data", tag);
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
             return dic;
         }
 
@@ -80,30 +66,21 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> GetTag(string name = "", long code = 0)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
-            try
+            TagBiz tagBiz = new TagBiz();
+            List<Tag> tag = new List<Tag>();
+            // 根据代码或名称获取标签
+            if (code != 0)
             {
-                TagBiz tagBiz = new TagBiz();
-                List<Tag> tag = new List<Tag>();
-                // 根据代码或名称获取标签
-                if (code != 0)
-                {
-                    tag.Add(tagBiz.GetTagByCode(code));
-                }
-                else
-                {
-                    tag = tagBiz.GetTagByFuzzyName(name);
-                }
-
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data", tag.Select(a => new { a.Code, a.Name, a.CreatedAt }));
+                tag.Add(tagBiz.GetTagByCode(code));
             }
-            catch (Exception e)
+            else
             {
-                dic.Add("status", 400);
-                dic.Add("message", e.Message);
+                tag = tagBiz.GetTagByFuzzyName(name);
             }
 
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", tag.Select(a => new { a.Code, a.Name, a.CreatedAt }));
             return dic;
         }
 
@@ -117,29 +94,15 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> GetALLTags(int page = 0, int pageSize = 0)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
-            try
-            {
-                TagBiz tagBiz = new TagBiz();
-                var tags = tagBiz.GetAllTag(page, pageSize);
-                //if (tags == null) throw new CustomException("未查询到数据！");
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data", tags.Select(a => new { a.Code, a.Name, a.CreatedAt }));
-            }
-            catch (CustomException e)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", e.Message);
-            }
-            catch (Exception e)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", "系统错误！错误代码:" + e.HResult);
-            }
+
+            TagBiz tagBiz = new TagBiz();
+            var tags = tagBiz.GetAllTag(page, pageSize);
+            //if (tags == null) throw new CustomException("未查询到数据！");
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", tags.Select(a => new { a.Code, a.Name, a.CreatedAt }));
 
             return dic;
         }
-
-
     }
 }
