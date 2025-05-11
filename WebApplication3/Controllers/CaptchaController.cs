@@ -18,53 +18,41 @@ namespace WebApplication3.Controllers
         [HttpGet("Captcha")]
         public Dictionary<string, object> Captcha()
         {
-            try
+            string id = Guid.NewGuid().ToString();
+            var info = _captcha.Generate(id);
+            // 有多处验证码且过期时间不一样，可传第二个参数覆盖默认配置。
+            //var info = _captcha.Generate(id,120);
+            return new Dictionary<string, object>()
             {
-                string id = Guid.NewGuid().ToString();
-                var info = _captcha.Generate(id);
-                // 有多处验证码且过期时间不一样，可传第二个参数覆盖默认配置。
-                //var info = _captcha.Generate(id,120);
-                return new Dictionary<string, object>()
+                { "status", 200 },
                 {
-                    { "status", 200 },
+                    "data", new
                     {
-                        "data", new
-                        {
-                            CaptchaID = id,
-                            Base64 = info.Base64,
-                        }
-                    },
-                    { "message", "成功" }
-                };
-            }
-            catch (Exception ex)
-            {
-                return new Dictionary<string, object>()
-                {
-                    { "status", 400 },
-                    { "message", ex.Message }
-                };
-
-            }
+                        CaptchaID = id,
+                        Base64 = info.Base64,
+                    }
+                },
+                { "message", "成功" }
+            };
         }
 
         /// <summary>
         /// 演示时使用HttpGet传参方便，这里仅做返回处理
         /// </summary>
-        [HttpGet("validate")]
-        public bool Validate(string id, string code)
-        {
-            return _captcha.Validate(id, code);
-        }
-
-        /// <summary>
-        /// 多次校验（https://gitee.com/pojianbing/lazy-captcha/issues/I4XHGM）
-        /// 演示时使用HttpGet传参方便，这里仅做返回处理
-        /// </summary>
-        [HttpGet("validate2")]
-        public bool Validate2(string id, string code)
-        {
-            return _captcha.Validate(id, code, false);
-        }
-    }
+        //[HttpGet("validate")]
+        //public bool Validate(string id, string code)
+        //{
+        //    return _captcha.Validate(id, code);
+        //}
+//
+        ///// <summary>
+        ///// 多次校验（https://gitee.com/pojianbing/lazy-captcha/issues/I4XHGM）
+        ///// 演示时使用HttpGet传参方便，这里仅做返回处理
+        ///// </summary>
+        //[HttpGet("validate2")]
+        //public bool Validate2(string id, string code)
+        //{
+        //    return _captcha.Validate(id, code, false);
+        //}
+    }//
 }

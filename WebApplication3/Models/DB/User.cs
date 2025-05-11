@@ -38,9 +38,22 @@ namespace WebApplication3.Models.DB
         /// 密码的混淆码（加盐值）
         /// </summary>
         public string Confuse { get; set; }
+
         /// <summary>
         /// 用户角色
         /// </summary>
-        public int Role { get; set; } 
+        public int Role { get; set; }
+        /// <summary>
+        /// 审核次数，每次进行审核，都+1
+        /// </summary>
+        public int ExamineCount { get; set; }
+
+        /// <summary>
+        /// 上次审核时间，上次审核时间若小于当月开始时间，则重置审核次数
+        /// 比如：若此值为2025/05/11 ，当前时间为 2025/05/12 则不重置
+        /// 比如：若此值为2025/05/11 ，当前时间为 2025/06/01 则重置
+        /// </summary>
+        public DateTime LastExamineTime { get; set; } = DateTime.MinValue;
+
     }
 }

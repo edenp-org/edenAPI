@@ -205,6 +205,15 @@ namespace WebApplication3.Biz
             // 调用数据访问对象的方法获取用户喜欢的作品
             dao.GetUserLikeWork(userId, workId);
         }
-        
+
+        public void IncreasExamineCount(long userCode, int incrementBy = 1)
+        {
+            dao.IncreasExamineCount(userCode, incrementBy);
+        }
+
+        public void ResetExamineCount(long userCode)
+        {
+            dao.ResetExamineCount(userCode);
+        }
     }
 }

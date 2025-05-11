@@ -54,7 +54,7 @@ namespace WebApplication3.Models.DB
         /// 是否审核
         /// </summary>
 
-        public int IsToExamine { get; set; }
+        public int IsExamine { get; set; }
 
         /// <summary>
         /// 审核时间

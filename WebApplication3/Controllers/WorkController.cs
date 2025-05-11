@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
+using WebApplication3.Foundation.Exceptions;
 using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
@@ -32,79 +33,81 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> ReleaseWork([FromBody] Dictionary<string, object> pairs)
         {
             var dic = new Dictionary<string, object>();
-            try
+
+            // 验证输入参数
+            if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
+                throw new CustomException("没有入参！");
+            var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
+            if (!data.TryGetValue("title", out var title) || string.IsNullOrEmpty(title.ToString()))
+                throw new CustomException("请输入标题！");
+            if (!data.TryGetValue("description", out var description) ||
+                string.IsNullOrEmpty(description.ToString())) throw new CustomException("请输入介绍！");
+            if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
+                throw new CustomException("请输入内容！");
+            if (!data.TryGetValue("Tags", out var tags) || string.IsNullOrEmpty(tags.ToString()))
+                throw new CustomException("没有标签！");
+
+            // 获取用户信息
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var Uname = HttpContext.Items["Uname"]?.ToString();
+            var UCode = HttpContext.Items["Code"]?.ToString();
+            if (string.IsNullOrEmpty(userId)) throw new CustomException("用户未授权！");
+            if (!long.TryParse(UCode, out long UCodeLong)) throw new CustomException("用户未授权");
+            // 处理标签
+            var tagList = tags.ToString().FromJsonString<List<string>>();
+            var tagBiz = new TagBiz();
+            var tagCodes = new ConcurrentBag<long>();
+
+            tagList.ForEach(tagName =>
             {
-                // 验证输入参数
-                if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
-                    throw new Exception("没有入参！");
-                var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
-                if (!data.TryGetValue("title", out var title) || string.IsNullOrEmpty(title.ToString()))
-                    throw new Exception("请输入标题！");
-                if (!data.TryGetValue("description", out var description) ||
-                    string.IsNullOrEmpty(description.ToString())) throw new Exception("请输入介绍！");
-                if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
-                    throw new Exception("请输入内容！");
-                if (!data.TryGetValue("Tags", out var tags) || string.IsNullOrEmpty(tags.ToString()))
-                    throw new Exception("没有标签！");
+                if (string.IsNullOrEmpty(tagName)) throw new CustomException("标签不能为空！");
+                var tag = tagBiz.GetTagByName(tagName);
+                if (tag == null) throw new CustomException($"标签“{tagName}”不存在！");
+                tagCodes.Add(tag.Code);
+            });
 
-                // 获取用户信息
-                var userId = HttpContext.Items["UserId"]?.ToString();
-                var Uname = HttpContext.Items["Uname"]?.ToString();
-                var UCode = HttpContext.Items["Code"]?.ToString();
-                if (string.IsNullOrEmpty(userId)) throw new Exception("用户未授权！");
-                if (!long.TryParse(UCode, out long UCodeLong)) throw new Exception("用户未授权");
-                // 处理标签
-                var tagList = tags.ToString().FromJsonString<List<string>>();
-                var tagBiz = new TagBiz();
-                var tagCodes = new ConcurrentBag<long>();
+            // 获取用户信息
+            var userBiz = new UserBiz();
+            var workBiz = new WorkBiz();
+            var user = userBiz.GetUserByUname(Uname);
 
-                tagList.ForEach(tagName =>
+            // 添加作品
+            Work work;
+            lock (_lock)
+            {
+                work = workBiz.AddWork(new Work
                 {
-                    if (string.IsNullOrEmpty(tagName)) throw new Exception("标签不能为空！");
-                    var tag = tagBiz.GetTagByName(tagName);
-                    if (tag == null) throw new Exception($"标签“{tagName}”不存在！");
-                    tagCodes.Add(tag.Code);
+                    Title = title.ToString(),
+                    Description = description.ToString(),
+                    AuthorCode = UCodeLong,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    AuthorName = user.Username,
+                    Tags = tagList.ToJsonString(),
+                    Code = workBiz.GetNewWorkCode()
                 });
-
-                // 获取用户信息
-                var userBiz = new UserBiz();
-                var workBiz = new WorkBiz();
-                var user = userBiz.GetUserByUname(Uname);
-
-                // 添加作品
-                Work work;
-                lock (_lock)
-                {
-                    work = workBiz.AddWork(new Work
-                    {
-                        Title = title.ToString(),
-                        Description = description.ToString(),
-                        AuthorCode = UCodeLong,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow,
-                        AuthorName = user.Username,
-                        Tags = tagList.ToJsonString(),
-                        Code = workBiz.GetNewWorkCode()
-                    });
-                }
-
-                // 关联作品和标签
-                tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
-
-                // 保存作品内容到文件
-                var root = Path.Combine(_env.WebRootPath, "Work", UCodeLong.ToString());
-                if (!Directory.Exists(root)) Directory.CreateDirectory(root);
-                System.IO.File.WriteAllText(Path.Combine(root, work.Id + ".TXT"), content.ToString());
-
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
             }
-            catch (Exception ex)
+
+            // 关联作品和标签
+            tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
+
+            // 保存作品内容到文件
+            var root = Path.Combine(_env.WebRootPath, "Work", UCodeLong.ToString());
+            if (!Directory.Exists(root)) Directory.CreateDirectory(root);
+            System.IO.File.WriteAllText(Path.Combine(root, work.Code + ".TXT"), content.ToString());
+
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", new
             {
-                dic.Add("status", 400);
-                dic.Add("message", ex.Message);
-            }
-
+                work.Code,
+                work.Title,
+                work.Description,
+                work.CreatedAt,
+                work.UpdatedAt,
+                work.AuthorCode,
+                work.AuthorName,
+            });
             return dic;
         }
 
@@ -117,21 +120,14 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> GetWork(long workCode = 0)
         {
             var dic = new Dictionary<string, object>();
-            try
-            {
-                var workBiz = new WorkBiz();
-                var work = workBiz.GetWorkByGetWorkCode(workCode);
-                if (work == null) throw new Exception("未查询到数据！");
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data",
-                    new { work, url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT") });
-            }
-            catch (Exception ex)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", ex.Message);
-            }
+
+            var workBiz = new WorkBiz();
+            var work = workBiz.GetWorkByGetWorkCode(workCode);
+            if (work == null) throw new CustomException("未查询到数据！");
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", new { work, url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT") });
+
 
             return dic;
         }
@@ -146,33 +142,25 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> GetArticlesByUserFavoriteTags(int page = 0, int pageSize = 0)
         {
             var dic = new Dictionary<string, object>();
-            try
-            {
-                // 获取用户Code
-                var uCode = HttpContext.Items["Code"]?.ToString();
-                if (string.IsNullOrEmpty(uCode) || !long.TryParse(uCode, out long userCode))
-                {
-                    throw new Exception("用户未授权！");
-                }
 
-                var workBiz = new WorkBiz();
-                var workList = workBiz.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
-                if (workList == null) throw new Exception("未查询到数据！");
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data", workList.Select(a => new
-                {
-                    a.Code,
-                    a.Tags,
-                    a.Description
-                }));
-            }
-            catch (Exception ex)
+            // 获取用户Code
+            var uCode = HttpContext.Items["Code"]?.ToString();
+            if (string.IsNullOrEmpty(uCode) || !long.TryParse(uCode, out long userCode))
             {
-                dic.Add("status", 400);
-                dic.Add("message", ex.Message);
+                throw new CustomException("用户未授权！");
             }
 
+            var workBiz = new WorkBiz();
+            var workList = workBiz.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
+            if (workList == null) throw new CustomException("未查询到数据！");
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", workList.Select(a => new
+            {
+                a.Code,
+                a.Tags,
+                a.Description
+            }));
             return dic;
         }
 
@@ -188,52 +176,19 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> GetWorksByTagCode(long tagCode = 0, int page = 0, int pageSize = 0)
         {
             var dic = new Dictionary<string, object>();
-            try
+            if (tagCode == 0) throw new CustomException("没有标签！");
+            var workBiz = new WorkBiz();
+            var workList = workBiz.GetWorksByTagCode(tagCode, page, pageSize);
+            if (workList == null) throw new CustomException("未查询到数据！");
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", workList.Select(a => new
             {
-                if (tagCode == 0) throw new Exception("没有标签！");
-                var workBiz = new WorkBiz();
-                var workList = workBiz.GetWorksByTagCode(tagCode, page, pageSize);
-                if (workList == null) throw new Exception("未查询到数据！");
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data", workList.Select(a => new
-                {
-                    a.Code,
-                    a.Tags,
-                    a.Description,
-                    a.Title
-                }).ToList());
-            }
-            catch (Exception ex)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", ex.Message);
-            }
-
-            return dic;
-        }
-
-        [HttpPost("GetExamineResult")]
-        public Dictionary<string, object> GetExamineResult(Dictionary<string,object> pairs)
-        {
-            var dic = new Dictionary<string, object>();
-            try
-            {
-                if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
-                    throw new Exception("没有入参！");
-                var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
-                if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
-                    throw new Exception("请输入内容！");
-                TextModerationAutoRouteHelper.Examine(content.ToString());
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-            }
-            catch (Exception ex)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", ex.Message);
-            }
-
+                a.Code,
+                a.Tags,
+                a.Description,
+                a.Title
+            }).ToList());
             return dic;
         }
     }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
+using WebApplication3.Foundation.Exceptions;
 using WebApplication3.Models.DB;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -25,42 +26,33 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> AddTag(Dictionary<string, object> pairs)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
-            try
+            // 检查输入参数
+            if (!pairs.TryGetValue("data", out object dataObj)) throw new CustomException("没有入参！");
+            var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
+            if (!data.TryGetValue("Name", out string Name)) throw new CustomException("没有Tag名");
+            var userId = HttpContext.Items["UserId"]?.ToString();
+
+            TagBiz tagBiz = new TagBiz();
+            // 检查标签是否已存在
+            if (tagBiz.GetTagByName(Name) != null) throw new CustomException("该Tag已存在");
+
+            Tag tag;
+            // 使用锁确保线程安全
+            lock (_lock)
             {
-                // 检查输入参数
-                if (!pairs.TryGetValue("data", out object dataObj)) throw new Exception("没有入参！");
-                var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
-                if (!data.TryGetValue("Name", out string Name)) throw new Exception("没有Tag名");
-                var userId = HttpContext.Items["UserId"]?.ToString();
-
-                TagBiz tagBiz = new TagBiz();
-                // 检查标签是否已存在
-                if (tagBiz.GetTagByName(Name) != null) throw new Exception("该Tag已存在");
-
-                Tag tag;
-                // 使用锁确保线程安全
-                lock (_lock)
+                tag = new Tag()
                 {
-                    tag = new Tag()
-                    {
-                        CreatedAt = DateTime.UtcNow,
-                        Name = Name,
-                        UId = int.Parse(userId),
-                        Code = tagBiz.GetNewTagCode()
-                    };
-                    tag = tagBiz.AddTag(tag);
-                }
-
-                dic.Add("data", tag);
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-            }
-            catch (Exception e)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", e.Message);
+                    CreatedAt = DateTime.UtcNow,
+                    Name = Name,
+                    UId = int.Parse(userId),
+                    Code = tagBiz.GetNewTagCode()
+                };
+                tag = tagBiz.AddTag(tag);
             }
 
+            dic.Add("data", tag);
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
             return dic;
         }
 
@@ -74,30 +66,21 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> GetTag(string name = "", long code = 0)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
-            try
+            TagBiz tagBiz = new TagBiz();
+            List<Tag> tag = new List<Tag>();
+            // 根据代码或名称获取标签
+            if (code != 0)
             {
-                TagBiz tagBiz = new TagBiz();
-                List<Tag> tag = new List<Tag>();
-                // 根据代码或名称获取标签
-                if (code != 0)
-                {
-                    tag.Add(tagBiz.GetTagByCode(code));
-                }
-                else
-                {
-                    tag = tagBiz.GetTagByFuzzyName(name);
-                }
-
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data", tag.Select(a => new { a.Code, a.Name, a.CreatedAt }));
+                tag.Add(tagBiz.GetTagByCode(code));
             }
-            catch (Exception e)
+            else
             {
-                dic.Add("status", 400);
-                dic.Add("message", e.Message);
+                tag = tagBiz.GetTagByFuzzyName(name);
             }
 
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", tag.Select(a => new { a.Code, a.Name, a.CreatedAt }));
             return dic;
         }
 
@@ -111,24 +94,15 @@ namespace WebApplication3.Controllers
         public Dictionary<string, object> GetALLTags(int page = 0, int pageSize = 0)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
-            try
-            {
-                TagBiz tagBiz = new TagBiz();
-                var tags = tagBiz.GetAllTag(page, pageSize);
-                if (tags == null) throw new Exception("未查询到数据！");
-                dic.Add("status", 200);
-                dic.Add("message", "成功");
-                dic.Add("data", tags.Select(a => new { a.Code, a.Name, a.CreatedAt }));
-            }
-            catch (Exception e)
-            {
-                dic.Add("status", 400);
-                dic.Add("message", e.Message);
-            }
+
+            TagBiz tagBiz = new TagBiz();
+            var tags = tagBiz.GetAllTag(page, pageSize);
+            //if (tags == null) throw new CustomException("未查询到数据！");
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", tags.Select(a => new { a.Code, a.Name, a.CreatedAt }));
 
             return dic;
         }
-
-
     }
 }

@@ -3,6 +3,7 @@ using Lazy.Captcha.Core.Generator;
 using Lazy.Captcha.Core;
 using WebApplication3.Foundation.Helper;
 using Microsoft.Extensions.FileProviders;
+using WebApplication3.Foundation.Middleware;
 
 namespace WebApplication3
 {
@@ -24,8 +25,7 @@ namespace WebApplication3
                             .AllowAnyMethod();
                     });
             });
-
-
+            NLogHelper.Debug("系统启动中....");
             builder.Services.AddCaptcha(builder.Configuration, option =>
             {
                 option.CaptchaType = CaptchaType.NUMBER; // 验证码类型
@@ -68,6 +68,7 @@ namespace WebApplication3
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
