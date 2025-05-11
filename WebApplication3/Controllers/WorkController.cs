@@ -94,10 +94,20 @@ namespace WebApplication3.Controllers
             // 保存作品内容到文件
             var root = Path.Combine(_env.WebRootPath, "Work", UCodeLong.ToString());
             if (!Directory.Exists(root)) Directory.CreateDirectory(root);
-            System.IO.File.WriteAllText(Path.Combine(root, work.Id + ".TXT"), content.ToString());
+            System.IO.File.WriteAllText(Path.Combine(root, work.Code + ".TXT"), content.ToString());
 
             dic.Add("status", 200);
             dic.Add("message", "成功");
+            dic.Add("data", new
+            {
+                work.Code,
+                work.Title,
+                work.Description,
+                work.CreatedAt,
+                work.UpdatedAt,
+                work.AuthorCode,
+                work.AuthorName,
+            });
             return dic;
         }
 
