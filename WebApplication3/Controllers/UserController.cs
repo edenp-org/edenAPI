@@ -133,7 +133,7 @@ namespace WebApplication3.Controllers
             if (!string.IsNullOrEmpty(request.data.Uname) && !string.IsNullOrEmpty(request.data.Email)) throw new CustomException("请选择登录方式");
 
             // 验证验证码
-            if (!_captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("验证码错误！");
+            //if (!_captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("验证码错误！");
 
             var userBiz = new UserBiz();
             var userTokenBiz = new UserTokenBiz();

@@ -73,5 +73,13 @@ namespace WebApplication3.Dao
                 .Set(w=>w.CollectionOrder,orderCode)
                 .ExecuteAffrows();
         }
+
+        public void ApproveArticleReview(long workCode)
+        {
+            FreeSqlHelper.Instance.Update<Work>().Where(w => w.Code == workCode)
+                .Set(w => w.IsExamine, 1)
+                .Set(w => w.ExamineDate, DateTime.UtcNow)
+                .ExecuteAffrows();
+        }
     }
 }
