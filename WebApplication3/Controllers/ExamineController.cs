@@ -12,7 +12,7 @@ namespace WebApplication3.Controllers;
 [ApiController]
 public class ExamineController(IWebHostEnvironment env) : ControllerBase
 {
-    [Authorize(false),HttpPost("GetExamineResult")]
+    [Authorize(false), HttpPost("GetExamineResult")]
     public Dictionary<string, object> GetExamineResult(Dictionary<string, object> pairs)
     {
         var user = UserHelper.GetUserFromContext(HttpContext);
@@ -23,14 +23,15 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
             userBiz.ResetExamineCount(user.Code);
             user.ExamineCount = 0;
         }
+
         userBiz.IncreasExamineCount(user.Code);
-        if (1000 - user.ExamineCount <=0) throw new CustomException("审核次数已用完！");
+        if (1000 - user.ExamineCount <= 0) throw new CustomException("审核次数已用完！");
 
         Dictionary<string, object> dic = new Dictionary<string, object>();
         if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString())) throw new CustomException("没有入参！");
         Dictionary<string, object> data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
 
-        if (!data.TryGetValue("workcode", out var workCodeObj) || string.IsNullOrEmpty(workCodeObj.ToString()) || !long.TryParse(workCodeObj.ToString(),out long workCode)) throw new CustomException("未获取到文章code！");
+        if (!data.TryGetValue("workcode", out var workCodeObj) || string.IsNullOrEmpty(workCodeObj.ToString()) || !long.TryParse(workCodeObj.ToString(), out long workCode)) throw new CustomException("未获取到文章code！");
 
         WorkBiz workBiz = new WorkBiz();
         var work = workBiz.GetWorkByGetWorkCode(workCode);
@@ -48,20 +49,21 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         if (textModerationResponse.choices == null || textModerationResponse.choices.Count == 0) throw new CustomException("未获取到审核结果！");
 
         ExamineRecordBiz examineRecordBiz = new ExamineRecordBiz();
-        examineRecordBiz.Add(new  ExamineRecord()
+        examineRecordBiz.Add(new ExamineRecord()
         {
             CreatedAt = DateTime.UtcNow,
             WorkCode = work.Code,
             Result = textModerationResponse.ToJsonString()
         });
+        var msgTextModerationResponseContent = textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>();
+        if (msgTextModerationResponseContent.PoliticsResultCode != 1 && msgTextModerationResponseContent.PoliticsScore > 50 &&
+            msgTextModerationResponseContent.AIResultCode != 1 && msgTextModerationResponseContent.AIScore > 50 &&
+            msgTextModerationResponseContent.AdultResultCode != 1 && msgTextModerationResponseContent.AdultScore < 50)
+            workBiz.ApproveArticleReview(workCode);
 
         dic.Add("status", 200);
         dic.Add("message", "成功");
-        dic.Add("data", textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>());
-
-        //textModerationResponse.choices[0].message.content = "";
-        //textModerationResponse.id = "";
-        //dic.Add("textModerationResponse", textModerationResponse);
+            dic.Add("data", msgTextModerationResponseContent);
         return dic;
     }
 

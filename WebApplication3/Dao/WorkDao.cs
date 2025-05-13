@@ -60,18 +60,38 @@ namespace WebApplication3.Dao
         public Work GetCollectionOrderMax(long collectionCode)
         {
             return FreeSqlHelper.Instance.Select<Work>()
-                .Where(w=>w.CollectionOrder == collectionCode)
+                .Where(w => w.CollectionOrder == collectionCode)
                 .OrderByDescending(w => w.CollectionOrder)
                 .First();
         }
 
-        public void AddWorkToCollection(long collectionCode,long workCode,long  orderCode)
+        public void AddWorkToCollection(long collectionCode, long workCode, long orderCode)
         {
             FreeSqlHelper.Instance.Update<Work>()
-                .Where(w=>w.Code == workCode)
-                .Set(w=>w.CollectionCode,collectionCode)
-                .Set(w=>w.CollectionOrder,orderCode)
+                .Where(w => w.Code == workCode)
+                .Set(w => w.CollectionCode, collectionCode)
+                .Set(w => w.CollectionOrder, orderCode)
                 .ExecuteAffrows();
+        }
+
+        public void ApproveArticleReview(long workCode)
+        {
+            FreeSqlHelper.Instance.Update<Work>().Where(w => w.Code == workCode)
+                .Set(w => w.IsExamine, 1)
+                .Set(w => w.ExamineDate, DateTime.UtcNow)
+                .ExecuteAffrows();
+        }
+
+        public Work UpdateWork(long workCode, string title, string description)
+        {
+            FreeSqlHelper.Instance.Update<Work>()
+                .Where(w => w.Code == workCode)
+                .Set(w => w.Title, title)
+                .Set(w => w.Description, description)
+                .Set(w => w.UpdatedAt, DateTime.UtcNow)
+                .Set(w => w.IsExamine == 1)
+                .ExecuteAffrows();
+            return GetWorkByGetWorkCode(workCode);
         }
     }
 }

@@ -53,16 +53,16 @@ public class TextModerationAutoRouteHelper
             { "AdultResultCode", "<是否涉及淫秽内容,0-正常，1-违规>" },
             { "AdultScore", "淫秽内容的违规评分 0-100 ，越高违规概率就越高>" },
             { "AdultContent", new[] { "<淫秽内容,展示原文，不设置数组数量设置上限，需尽量展示完全>" } },
-            { "AdultEvaluate", "<淫秽内容的评价，说明违规原因>" },
-            { "AdultSuggestion", "<淫秽内容的修改建议>" },
+            { "AdultEvaluate", "<淫秽内容的评价，说明违规原因(使用较为温和的语气)>" },
+            { "AdultSuggestion", "<淫秽内容的修改建议(使用较为温和的语气)>" },
             { "AIResultCode", "<是否AI生成,0-正常，1-违规>" },
             { "AIScore", "AI生成的概率评分 0-100 ，越高违规概率就越高>" },
-            { "AIEvaluate", "<AI内容的评价，说明违规原因>" },
+            { "AIEvaluate", "<AI内容的评价，说明违规原因(使用较为温和的语气)>" },
             { "PoliticsResultCode", "<是否涉及涉政内容,0-正常，1-违规>" },
             { "PoliticsScore", "敏感涉政内容的违规评分 0-100 ，越高违规概率就越高>" },
             { "PoliticsContent", new[] { "<敏感涉政内容,展示原文，不设置数组数量设置上限，需尽量展示完全>" } },
-            { "PoliticsEvaluate", "<敏感涉政内容的评价，说明违规原因>" },
-            { "PoliticsSuggestion", "<敏感涉政内容的修改建议>" }
+            { "PoliticsEvaluate", "<敏感涉政内容的评价，说明违规原因(使用较为温和的语气)>" },
+            { "PoliticsSuggestion", "<敏感涉政内容的修改建议(使用较为温和的语气)>" }
         };
     }
 
@@ -130,18 +130,57 @@ public class TextModerationAutoRouteHelper
 
     public class TextModerationResponseContent
     {
-        public string AdultResultCode { get; set; }
-        public string AdultScore { get; set; }
+        /// <summary>
+        /// 是否包含成人内容
+        /// </summary>
+        public int AdultResultCode { get; set; }
+        /// <summary>
+        /// 成人内容评分
+        /// </summary>
+        public int AdultScore { get; set; }
+        /// <summary>
+        /// 成人内容
+        /// </summary>
         public List<string> AdultContent { get; set; }
+        /// <summary>
+        /// 成人内容评价
+        /// </summary>
         public string AdultEvaluate { get; set; }
+        /// <summary>
+        /// 成人内容修改建议
+        /// </summary>
         public string AdultSuggestion { get; set; }
-        public string AIResultCode { get; set; }
-        public string AIScore { get; set; }
+        /// <summary>
+        /// 是否为AI生成
+        /// </summary>
+        public int AIResultCode { get; set; }
+        /// <summary>
+        /// AI生成评分
+        /// </summary>
+        public int AIScore { get; set; }
+        /// <summary>
+        /// AI内容的评价
+        /// </summary>
         public string AIEvaluate { get; set; }
-        public string PoliticsResultCode { get; set; }
-        public string PoliticsScore { get; set; }
+        /// <summary>
+        ///  是否涉政
+        /// </summary>
+        public int PoliticsResultCode { get; set; }
+        /// <summary>
+        /// 涉政评分
+        /// </summary>
+        public int PoliticsScore { get; set; }
+        /// <summary>
+        /// 涉政内容
+        /// </summary>
         public List<string> PoliticsContent { get; set; }
+        /// <summary>
+        /// 涉政内容评价
+        /// </summary>
         public string PoliticsEvaluate { get; set; }
+        /// <summary>
+        /// 涉政修改建议
+        /// </summary>
         public string PoliticsSuggestion { get; set; }
     }
 }
