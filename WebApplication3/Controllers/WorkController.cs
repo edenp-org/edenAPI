@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel.DataAnnotations;
 using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
 using WebApplication3.Foundation.Exceptions;
-using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,14 +13,28 @@ namespace WebApplication3.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class WorkController : ControllerBase
+    public class WorkController(IWebHostEnvironment env) : ControllerBase
     {
-        private readonly IWebHostEnvironment _env;
-        private static readonly object _lock = new object();
+        private static readonly object Lock = new object();
 
-        public WorkController(IWebHostEnvironment env)
+
+        // 添加嵌套请求模型
+        public class ReleaseWorkRequest
         {
-            _env = env;
+            [Required(ErrorMessage = "请求数据不能为空！")] public WorkData Data { get; set; }
+
+            public class WorkData
+            {
+                [Required(ErrorMessage = "请输入标题！")] public string Title { get; set; }
+
+                [Required(ErrorMessage = "请输入介绍！")] public string Description { get; set; }
+
+                [Required(ErrorMessage = "请输入内容！")] public string Content { get; set; }
+
+                [Required(ErrorMessage = "请至少添加一个标签！")] public List<string> Tags { get; set; }
+                [Required(ErrorMessage = "Code不可为空！")] public long Code { get; set; }
+
+            }
         }
 
         /// <summary>
@@ -30,31 +43,33 @@ namespace WebApplication3.Controllers
         /// <param name="pairs">入参</param>
         /// <returns>返回发布结果</returns>
         [Authorize(false), HttpPost("ReleaseWork")]
-        public Dictionary<string, object> ReleaseWork([FromBody] Dictionary<string, object> pairs)
+        public Dictionary<string, object> ReleaseWork([FromBody] ReleaseWorkRequest request)
         {
             var dic = new Dictionary<string, object>();
 
-            // 验证输入参数
-            if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString()))
-                throw new CustomException("没有入参！");
-            var data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
-            if (!data.TryGetValue("title", out var title) || string.IsNullOrEmpty(title.ToString()))
-                throw new CustomException("请输入标题！");
-            if (!data.TryGetValue("description", out var description) ||
-                string.IsNullOrEmpty(description.ToString())) throw new CustomException("请输入介绍！");
-            if (!data.TryGetValue("content", out var content) || string.IsNullOrEmpty(content.ToString()))
-                throw new CustomException("请输入内容！");
-            if (!data.TryGetValue("Tags", out var tags) || string.IsNullOrEmpty(tags.ToString()))
-                throw new CustomException("没有标签！");
+            // 模型验证
+            if (!ModelState.IsValid)
+            {
+                var errorMessage = ModelState.Values.FirstOrDefault()?.Errors.FirstOrDefault()?.ErrorMessage ?? "参数验证失败";
+                throw new CustomException(errorMessage);
+            }
+            // 从嵌套对象中获取数据
+            var data = request.Data;
+            var title = data.Title;
+            var description = data.Description;
+            var content = data.Content;
+            var tags = data.Tags;
+            var code = data.Code;
 
             // 获取用户信息
             var userId = HttpContext.Items["UserId"]?.ToString();
             var Uname = HttpContext.Items["Uname"]?.ToString();
             var UCode = HttpContext.Items["Code"]?.ToString();
+
             if (string.IsNullOrEmpty(userId)) throw new CustomException("用户未授权！");
             if (!long.TryParse(UCode, out long UCodeLong)) throw new CustomException("用户未授权");
             // 处理标签
-            var tagList = tags.ToString().FromJsonString<List<string>>();
+            var tagList = tags;
             var tagBiz = new TagBiz();
             var tagCodes = new ConcurrentBag<long>();
 
@@ -70,31 +85,48 @@ namespace WebApplication3.Controllers
             var userBiz = new UserBiz();
             var workBiz = new WorkBiz();
             var user = userBiz.GetUserByUname(Uname);
-
-            // 添加作品
             Work work;
-            lock (_lock)
+            if (code == 0)
             {
-                work = workBiz.AddWork(new Work
+                // 添加作品
+                lock (Lock)
                 {
-                    Title = title.ToString(),
-                    Description = description.ToString(),
-                    AuthorCode = UCodeLong,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    AuthorName = user.Username,
-                    Tags = tagList.ToJsonString(),
-                    Code = workBiz.GetNewWorkCode()
-                });
+                    work = workBiz.AddWork(new Work
+                    {
+                        Title = title,
+                        Description = description,
+                        AuthorCode = UCodeLong,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        AuthorName = user.Username,
+                        Tags = tagList.ToJsonString(),
+                        Code = workBiz.GetNewWorkCode()
+                    });
+                }
+
+                // 关联作品和标签
+                tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
+
+                // 保存作品内容到文件
+                var root = Path.Combine(env.WebRootPath, "Work", UCodeLong.ToString());
+                if (!Directory.Exists(root)) Directory.CreateDirectory(root);
+                System.IO.File.WriteAllText(Path.Combine(root, work.Code + ".TXT"), content);
             }
+            else
+            {
+                work = workBiz.GetWorkByGetWorkCode(code);
+                if (work == null) throw new CustomException("没有该作品！");
+                work = workBiz.UpdateWork(code, title, description);
 
-            // 关联作品和标签
-            tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
+                tagBiz.RemoveAllAssociatedTags(work.Code);
 
-            // 保存作品内容到文件
-            var root = Path.Combine(_env.WebRootPath, "Work", UCodeLong.ToString());
-            if (!Directory.Exists(root)) Directory.CreateDirectory(root);
-            System.IO.File.WriteAllText(Path.Combine(root, work.Code + ".TXT"), content.ToString());
+                // 关联作品和标签
+                tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
+
+                var root = Path.Combine(env.WebRootPath, "Work", UCodeLong.ToString());
+                if (!Directory.Exists(root)) Directory.CreateDirectory(root);
+                System.IO.File.WriteAllText(Path.Combine(root, work.Code + ".TXT"), content);
+            }
 
             dic.Add("status", 200);
             dic.Add("message", "成功");
@@ -114,7 +146,7 @@ namespace WebApplication3.Controllers
         /// <summary>
         /// 获取作品
         /// </summary>
-        /// <param name="workId">作品ID</param>
+        /// <param name="workCode">作品ID</param>
         /// <returns>返回作品信息</returns>
         [HttpGet("GetWork")]
         public Dictionary<string, object> GetWork(long workCode = 0)
@@ -127,8 +159,6 @@ namespace WebApplication3.Controllers
             dic.Add("status", 200);
             dic.Add("message", "成功");
             dic.Add("data", new { work, url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT") });
-
-
             return dic;
         }
 

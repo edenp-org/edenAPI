@@ -46,9 +46,14 @@ namespace WebApplication3.Biz
            return workDao.GetWorksByTagCode(tagCode, page, pageSize);
         }
 
-        public void ApproveArticleReview(long userCode)
+        public void ApproveArticleReview(long workcode)
         {
-            workDao.ApproveArticleReview(userCode);
+            workDao.ApproveArticleReview(workcode);
+        }
+
+        public Work UpdateWork(long workcode,string title,string dscription)
+        {
+           return workDao.UpdateWork(workcode, title, dscription);
         }
     }
 }

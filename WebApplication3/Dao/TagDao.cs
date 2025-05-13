@@ -67,5 +67,11 @@ namespace WebApplication3.Dao
                 .Where(t => t.Code == code)
                 .Any();
         }
+        public void RemoveAllAssociatedTags(long workCode)
+        {
+            FreeSqlHelper.Instance.Delete<WorkAndTag>()
+                .Where(w=>w.WorkId == workCode)
+                .ExecuteAffrows();
+        }
     }
 }

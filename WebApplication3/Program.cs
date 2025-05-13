@@ -1,6 +1,7 @@
 using FreeSql;
 using Lazy.Captcha.Core.Generator;
 using Lazy.Captcha.Core;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication3.Foundation.Helper;
 using Microsoft.Extensions.FileProviders;
 using WebApplication3.Foundation.Middleware;
@@ -58,9 +59,20 @@ namespace WebApplication3
 
                 option.ImageOption.TextBold = true; // 粗体，该配置2.0.3新增
             });
+            // 添加以下配置
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    // 保持与原始代码相同的JSON配置
+                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                });
             var app = builder.Build();
-
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -68,7 +80,6 @@ namespace WebApplication3
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseMiddleware<ExceptionHandlerMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

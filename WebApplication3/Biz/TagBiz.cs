@@ -37,6 +37,10 @@ namespace WebApplication3.Biz
         {
             return tagDao.GetAllTag(page, pageSize);
         }
+        public void RemoveAllAssociatedTags(long workCode)
+        {
+            tagDao.RemoveAllAssociatedTags(workCode);
+        }
         public long GetNewTagCode()
         {
             long newCode = 0;
