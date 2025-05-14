@@ -11,7 +11,7 @@ using WebApplication3.Sundry;
 namespace WebApplication3.Controllers
 {
     [Route("User")]
-    public class UserController : Controller
+    public class UserController(ICaptcha captcha) : Controller
     {
         #region 入参类型
 
@@ -105,14 +105,47 @@ namespace WebApplication3.Controllers
             }
         }
 
+        public class RetrievePasswordRequest
+        {
+            public RetrievePasswordRequestData data { get; set; }
+
+            public class RetrievePasswordRequestData
+            {
+                public string Email { get; set; }
+                public string OldPassword { get; set; }
+                public string Password { get; set; }
+                public string PasswordSecond { get; set; }
+                public string Captcha { get; set; }
+            }
+        }
+
         #endregion
 
-        private readonly ICaptcha _captcha;
         private static readonly object _codeLock = new object();
 
-        public UserController(ICaptcha captcha)
+        /// <summary>
+        /// 获取用户列表
+        /// </summary>
+        [OptionalAuthorize(), HttpGet("GetUsers")]
+        public Dictionary<string, object> GetUsers(string username = "", string email = "", long ucode = 0)
         {
-            _captcha = captcha;
+            User user = UserHelper.GetUserFromContextNoException(HttpContext);
+            UserBiz userBiz = new UserBiz();
+            var users = userBiz.GetUsers(username, user?.Role == 1 ? email : "", ucode)
+                .Select(u => new
+                {
+                    u.Code,
+                    u.Username,
+                    u.Role,
+                    Email = user?.Role == 1 ? u.Email : null,
+                    ExamineCount = user?.Role == 1 ? u.ExamineCount : (int?)null,
+                    LastExamineTime = user?.Role == 1 ? u.LastExamineTime : (DateTime?)null
+                }).ToList();
+            return new Dictionary<string, object>()
+            {
+                { "code", 200 },
+                { "data", users }
+            };
         }
 
         /// <summary>
@@ -133,7 +166,7 @@ namespace WebApplication3.Controllers
             if (!string.IsNullOrEmpty(request.data.Uname) && !string.IsNullOrEmpty(request.data.Email)) throw new CustomException("请选择登录方式");
 
             // 验证验证码
-            //if (!_captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("验证码错误！");
+            if (!captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("验证码错误！");
 
             var userBiz = new UserBiz();
             var userTokenBiz = new UserTokenBiz();
@@ -141,7 +174,7 @@ namespace WebApplication3.Controllers
             // 根据用户名或邮箱获取用户
             var user = !string.IsNullOrEmpty(request.data.Email) ? userBiz.GetUserByEmail(request.data.Email) : userBiz.GetUserByUname(request.data.Uname);
             if (user == null) throw new CustomException("用户名或邮箱或密码不存在！");
-            if (!user.Password.Equals(EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(request.data.Password) + user.Confuse)))
+            if (!user.Password.Equals(EncryptionHelper.ComputeSHA256(request.data.Password + user.Confuse)))
                 throw new CustomException("用户名或邮箱或密码不存在！");
 
             int expirationHours = ConfigHelper.GetInt("TokenExpirationHours");
@@ -181,7 +214,39 @@ namespace WebApplication3.Controllers
 
             return dic;
         }
+        [OptionalAuthorize(),HttpPost("RetrievePassword")]
+        public Dictionary<string, object> RetrievePassword([FromBody] RetrievePasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.data.Email)) throw new CustomException("请输入邮箱");
+            if (string.IsNullOrEmpty(request.data.Password)) throw new CustomException("请输入新密码");
+            if (string.IsNullOrEmpty(request.data.PasswordSecond)) throw new CustomException("请输入新密码的确认");
+            if (string.IsNullOrEmpty(request.data.Captcha)) throw new CustomException("请输入验证码");
+            var user = UserHelper.GetUserFromContextNoException(HttpContext);
+            UserTokenBiz userTokenBiz = new UserTokenBiz();
+            UserBiz userBiz = new UserBiz();
+            if (user == null)
+            {
+                if (request.data.Password != request.data.PasswordSecond) throw new CustomException("两次密码不一致！");
+                var userToken = userTokenBiz.GetTokenByUserAndPurpose(request.data.Email, "邮箱")
+                    .FirstOrDefault(u => u.Token.Equals(request.data.Captcha));
+                if (userToken == null) throw new CustomException("验证码错误或已过期！");
+                user = userBiz.GetUserByEmail(request.data.Email);
+                if (user == null) throw new CustomException("邮箱未注册！");
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(request.data.OldPassword)) throw new Exception("旧密码不能为空！");
+                if (EncryptionHelper.ComputeSHA256(request.data.OldPassword + user.Confuse) != user.Password) throw new CustomException("旧密码错误！");
+            }
 
+            string password =  EncryptionHelper.ComputeSHA256(request.data.Password + user.Confuse);
+            userBiz.RetrievePassword(user.Code, password);
+            return new Dictionary<string, object>()
+            {
+                {"status",200},
+                {"message","成功"}
+            };
+        }
 
         /// <summary>
         /// 刷新令牌
@@ -245,7 +310,7 @@ namespace WebApplication3.Controllers
             if (string.IsNullOrEmpty(request.data.Email)) throw new CustomException("请输入邮箱！");
             if (string.IsNullOrEmpty(request.data.CaptchaId)) throw new CustomException("请输入验证码ID！");
             if (string.IsNullOrEmpty(request.data.CaptchaInput)) throw new CustomException("请输入验证码！");
-            if (!_captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("错误的验证码");
+            if (!captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("错误的验证码");
 
             // 生成验证码
             var token = new Random().Next(100000, 999999).ToString();
@@ -256,7 +321,7 @@ namespace WebApplication3.Controllers
             {
                 Expiration = DateTime.UtcNow.AddMinutes(5),
                 CreatedAt = DateTime.UtcNow,
-                Purpose = "注册",
+                Purpose = "邮箱",
                 Token = token,
                 Username = request.data.Email
             });
@@ -298,7 +363,7 @@ namespace WebApplication3.Controllers
             if (userBiz.GetUserByUname(request.data.Uname) != null) throw new CustomException("用户名已被注册！");
 
             // 验证验证码
-            var userToken = userTokenBiz.GetTokenByUserAndPurpose(request.data.Email, "注册")
+            var userToken = userTokenBiz.GetTokenByUserAndPurpose(request.data.Email, "邮箱")
                 .FirstOrDefault(u => u.Token.Equals(request.data.Captcha));
             if (userToken == null) throw new CustomException("验证码错误或已过期！");
 
@@ -311,7 +376,7 @@ namespace WebApplication3.Controllers
                 {
                     Email = request.data.Email,
                     Username = request.data.Uname,
-                    Password = EncryptionHelper.ComputeSHA256(EncryptionHelper.ComputeSHA256(request.data.Password) + confuse),
+                    Password = EncryptionHelper.ComputeSHA256(request.data.Password + confuse),
                     Code = newCodeUser,
                     Confuse = confuse,
                     Role = 2
