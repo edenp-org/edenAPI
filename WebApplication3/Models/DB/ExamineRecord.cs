@@ -14,4 +14,14 @@ public class ExamineRecord
     public string Result { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public string DataSHA265 { get; set; }
+
+    public string UserName { get; set; }
+    
+    public long UserCode { get; set; }
+
+    public bool IsOk { get; set; } = false;
+
+    public bool IsAi { get; set; } = true;
 }

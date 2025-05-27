@@ -10,4 +10,9 @@ public class ExamineRecordBiz
     {
         dao.Add(record);
     }
+
+    public List<ExamineRecord> GetExamineRecords(long WorkCode)
+    {
+        return dao.GetExamineRecords(WorkCode);
+    }
 }

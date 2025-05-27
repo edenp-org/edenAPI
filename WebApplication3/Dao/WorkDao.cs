@@ -74,11 +74,14 @@ namespace WebApplication3.Dao
                 .ExecuteAffrows();
         }
 
-        public void ApproveArticleReview(long workCode)
+        public void ApproveArticleReview(long workCode, int IsExamine ,DateTime ExamineDate,bool IsPublished,bool isScheduledRelease,DateTime ScheduledReleaseTime)
         {
             FreeSqlHelper.Instance.Update<Work>().Where(w => w.Code == workCode)
-                .Set(w => w.IsExamine, 1)
+                .Set(w => w.IsExamine, IsExamine)
                 .Set(w => w.ExamineDate, DateTime.UtcNow)
+                .Set(w => w.IsPublished, IsPublished)
+                .Set(w=> w.IsScheduledRelease, isScheduledRelease)
+                .Set(w => w.ScheduledReleaseTime, ScheduledReleaseTime)
                 .ExecuteAffrows();
         }
 
@@ -89,7 +92,9 @@ namespace WebApplication3.Dao
                 .Set(w => w.Title, title)
                 .Set(w => w.Description, description)
                 .Set(w => w.UpdatedAt, DateTime.UtcNow)
-                .Set(w => w.IsExamine == 1)
+                .Set(w => w.IsExamine, 0)
+                .Set(w => w.IsPublished, false)
+                .Set(w=> w.IsScheduledRelease, false)
                 .ExecuteAffrows();
             return GetWorkByGetWorkCode(workCode);
         }

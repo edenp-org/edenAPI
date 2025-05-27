@@ -45,25 +45,32 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         TextModerationAutoRouteHelper textModerationAutoRouteHelper = new TextModerationAutoRouteHelper();
         TextModerationAutoRouteHelper.TextModerationResponse textModerationResponse = textModerationAutoRouteHelper.Examine(content);
 
+        bool isExamine = false;
 
         if (textModerationResponse.choices == null || textModerationResponse.choices.Count == 0) throw new CustomException("未获取到审核结果！");
-
+        var msgTextModerationResponseContent = textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>();
+        if ((msgTextModerationResponseContent.PoliticsResultCode != 1 && msgTextModerationResponseContent.PoliticsScore < 50) &&
+            (msgTextModerationResponseContent.AdultResultCode != 1 && msgTextModerationResponseContent.AdultScore < 50))
+            isExamine = true;
+        bool IsAi = false;
+        if ((msgTextModerationResponseContent.AIResultCode == 1 && msgTextModerationResponseContent.AIScore > 50)) IsAi = true;
         ExamineRecordBiz examineRecordBiz = new ExamineRecordBiz();
+
         examineRecordBiz.Add(new ExamineRecord()
         {
             CreatedAt = DateTime.UtcNow,
             WorkCode = work.Code,
-            Result = textModerationResponse.ToJsonString()
+            Result = textModerationResponse.ToJsonString(),
+            DataSHA265 = EncryptionHelper.ComputeSHA256(content),
+            UserName = user.Username,
+            UserCode = user.Code,
+            IsAi = IsAi,
+            IsOk = isExamine
         });
-        var msgTextModerationResponseContent = textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>();
-        if (msgTextModerationResponseContent.PoliticsResultCode != 1 && msgTextModerationResponseContent.PoliticsScore > 50 &&
-            msgTextModerationResponseContent.AIResultCode != 1 && msgTextModerationResponseContent.AIScore > 50 &&
-            msgTextModerationResponseContent.AdultResultCode != 1 && msgTextModerationResponseContent.AdultScore < 50)
-            workBiz.ApproveArticleReview(workCode);
 
         dic.Add("status", 200);
         dic.Add("message", "成功");
-            dic.Add("data", msgTextModerationResponseContent);
+        dic.Add("data", msgTextModerationResponseContent);
         return dic;
     }
 

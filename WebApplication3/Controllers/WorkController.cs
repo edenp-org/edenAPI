@@ -5,6 +5,7 @@ using TouchSocket.Core;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
 using WebApplication3.Foundation.Exceptions;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,7 +20,7 @@ namespace WebApplication3.Controllers
 
 
         // 添加嵌套请求模型
-        public class ReleaseWorkRequest
+        public class SaveWorkRequest
         {
             [Required(ErrorMessage = "请求数据不能为空！")] public WorkData Data { get; set; }
 
@@ -32,8 +33,8 @@ namespace WebApplication3.Controllers
                 [Required(ErrorMessage = "请输入内容！")] public string Content { get; set; }
 
                 [Required(ErrorMessage = "请至少添加一个标签！")] public List<string> Tags { get; set; }
-                [Required(ErrorMessage = "Code不可为空！")] public long Code { get; set; }
 
+                [Required(ErrorMessage = "Code不可为空！")] public long Code { get; set; }
             }
         }
 
@@ -42,8 +43,8 @@ namespace WebApplication3.Controllers
         /// </summary>
         /// <param name="pairs">入参</param>
         /// <returns>返回发布结果</returns>
-        [Authorize(false), HttpPost("ReleaseWork")]
-        public Dictionary<string, object> ReleaseWork([FromBody] ReleaseWorkRequest request)
+        [Authorize(false), HttpPost("SaveWork")]
+        public Dictionary<string, object> SaveWork([FromBody] SaveWorkRequest request)
         {
             var dic = new Dictionary<string, object>();
 
@@ -61,13 +62,9 @@ namespace WebApplication3.Controllers
             var tags = data.Tags;
             var code = data.Code;
 
-            // 获取用户信息
-            var userId = HttpContext.Items["UserId"]?.ToString();
-            var Uname = HttpContext.Items["Uname"]?.ToString();
-            var UCode = HttpContext.Items["Code"]?.ToString();
+            var user =  UserHelper.GetUserFromContext(HttpContext);
+            if (user == null) throw new CustomException("用户未授权！");
 
-            if (string.IsNullOrEmpty(userId)) throw new CustomException("用户未授权！");
-            if (!long.TryParse(UCode, out long UCodeLong)) throw new CustomException("用户未授权");
             // 处理标签
             var tagList = tags;
             var tagBiz = new TagBiz();
@@ -81,10 +78,7 @@ namespace WebApplication3.Controllers
                 tagCodes.Add(tag.Code);
             });
 
-            // 获取用户信息
-            var userBiz = new UserBiz();
             var workBiz = new WorkBiz();
-            var user = userBiz.GetUserByUname(Uname);
             Work work;
             if (code == 0)
             {
@@ -95,7 +89,7 @@ namespace WebApplication3.Controllers
                     {
                         Title = title,
                         Description = description,
-                        AuthorCode = UCodeLong,
+                        AuthorCode = user.Code,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         AuthorName = user.Username,
@@ -108,7 +102,7 @@ namespace WebApplication3.Controllers
                 tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
 
                 // 保存作品内容到文件
-                var root = Path.Combine(env.WebRootPath, "Work", UCodeLong.ToString());
+                var root = Path.Combine(env.WebRootPath, "Work", user.Code.ToString());
                 if (!Directory.Exists(root)) Directory.CreateDirectory(root);
                 System.IO.File.WriteAllText(Path.Combine(root, work.Code + ".TXT"), content);
             }
@@ -126,7 +120,7 @@ namespace WebApplication3.Controllers
                 // 关联作品和标签
                 tagBiz.AddWorkAndTag(tagCodes.ToList(), work.Code);
 
-                var root = Path.Combine(env.WebRootPath, "Work", UCodeLong.ToString());
+                var root = Path.Combine(env.WebRootPath, "Work", user.Code.ToString());
                 if (!Directory.Exists(root)) Directory.CreateDirectory(root);
                 System.IO.File.WriteAllText(Path.Combine(root, work.Code + ".TXT"), content);
             }
@@ -143,6 +137,65 @@ namespace WebApplication3.Controllers
                 work.AuthorCode,
                 work.AuthorName,
             });
+            return dic;
+        }
+
+        // 添加嵌套请求模型
+        public class PublisWorkRequest
+        {
+            [Required(ErrorMessage = "请求数据不能为空！")] public PublisWorkData Data { get; set; }
+
+            public class PublisWorkData
+            {
+                [Required(ErrorMessage = "Code不可为空！")] public long Code { get; set; }
+                public bool isScheduledRelease { get; set; } = false;
+                public DateTime ScheduledReleaseTime { get; set; } = DateTime.UtcNow;
+            }
+        }
+
+        [Authorize(false), HttpPost("PublishWork")]
+        public Dictionary<string, object> PublishWork([FromBody] PublisWorkRequest request)
+        {
+            var dic = new Dictionary<string, object>();
+            long workCode = request.Data.Code;
+            if (workCode == 0) throw new CustomException("没有作品ID！");
+
+            var isScheduledRelease = request.Data.isScheduledRelease;
+            var scheduledReleaseTime = request.Data.ScheduledReleaseTime;
+
+            var user =  UserHelper.GetUserFromContext(HttpContext);
+            if (user == null) throw new CustomException("用户未授权！");
+
+            WorkBiz workBiz = new WorkBiz();
+            var work = workBiz.GetWorkByGetWorkCode(workCode);
+            if (work == null) throw new CustomException("没有该作品！");
+            if (work.AuthorCode != user.Code) throw new CustomException("该作品不属于您！");
+
+            ExamineRecordBiz examineRecordBiz = new ExamineRecordBiz();
+
+            var root = Path.Combine(env.WebRootPath, "Work", user.Code.ToString());
+            if (!Directory.Exists(root)) Directory.CreateDirectory(root);
+
+            var examines = examineRecordBiz.GetExamineRecords(work.Code);
+            string text = System.IO.File.ReadAllText(Path.Combine(root, work.Code + ".TXT"));
+            var textSHA = EncryptionHelper.ComputeSHA256(text);
+            if (examines == null || examines.Count == 0) examines = new List<ExamineRecord>() { new ExamineRecord()
+            {
+                DataSHA265 = textSHA,
+                IsOk = false,
+                CreatedAt = DateTime.UtcNow
+            }};
+            var examine= examines.Where(e => e.DataSHA265.Equals(textSHA)).First();
+
+            workBiz.ApproveArticleReview(workCode,
+                examine.IsOk ? 1 : 0,
+                examine.CreatedAt,
+                true,
+                isScheduledRelease,
+                scheduledReleaseTime);
+
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
             return dic;
         }
 

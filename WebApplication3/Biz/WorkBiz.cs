@@ -1,10 +1,20 @@
 ﻿using WebApplication3.Dao;
+using WebApplication3.Foundation.Exceptions;
 using WebApplication3.Models.DB;
 
 namespace WebApplication3.Biz
 {
     public class WorkBiz
     {
+        private readonly IWebHostEnvironment env;
+        public WorkBiz()
+        {
+        }
+        public WorkBiz(IWebHostEnvironment env)
+        {
+            this.env = env;
+        }
+
         WorkDao workDao = new WorkDao();
 
         public Work AddWork(Work work)
@@ -46,9 +56,9 @@ namespace WebApplication3.Biz
            return workDao.GetWorksByTagCode(tagCode, page, pageSize);
         }
 
-        public void ApproveArticleReview(long workcode)
+        public void ApproveArticleReview(long workCode, int IsExamine ,DateTime ExamineDate,bool IsPublished,bool isScheduledRelease,DateTime ScheduledReleaseTime)
         {
-            workDao.ApproveArticleReview(workcode);
+            workDao.ApproveArticleReview(workCode, IsExamine, ExamineDate, IsPublished, isScheduledRelease, ScheduledReleaseTime);
         }
 
         public Work UpdateWork(long workcode,string title,string dscription)

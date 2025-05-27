@@ -50,11 +50,6 @@ namespace WebApplication3.Models.DB
         /// 标签
         /// </summary>
         public string Tags { get; set; }
-        /// <summary>
-        /// 是否审核
-        /// </summary>
-
-        public int IsExamine { get; set; }
 
         /// <summary>
         /// 审核时间
@@ -75,5 +70,26 @@ namespace WebApplication3.Models.DB
         /// 合集排序
         /// </summary>
         public long CollectionOrder { get; set; }
+
+        /// <summary>
+        /// 是否审核
+        /// </summary>
+
+        public int IsExamine { get; set; } = 0;
+
+        /// <summary>
+        /// 是否定时发布
+        /// </summary>
+        public bool IsScheduledRelease { get; set; } = false;
+
+        /// <summary>
+        /// 定时发布时间
+        /// </summary>
+        public DateTime ScheduledReleaseTime { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// 是否已发布
+        /// </summary>
+        public bool IsPublished { get; set; } = false;
     }
 }
