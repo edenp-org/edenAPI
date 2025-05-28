@@ -215,5 +215,15 @@ namespace WebApplication3.Biz
         {
             dao.ResetExamineCount(userCode);
         }
+
+        public List<User> GetUsers(string urername, string email, long ucode)
+        {
+            return dao.GetUsers(urername, email, ucode);
+        }
+
+        public void RetrievePassword(long code,string password)
+        {
+            dao.RetrievePassword(code,password);
+        }
     }
 }

@@ -242,5 +242,21 @@ namespace WebApplication3.Dao
                 .Where(u => u.Code == userCode)
                 .ExecuteAffrows();
         }
+
+        public List<User> GetUsers(string urername, string email, long ucode)
+        {
+            var select = FreeSqlHelper.Instance.Select<User>();
+            if (!string.IsNullOrEmpty(urername)) select.Where(u => u.Username.Contains(urername));
+            if (!string.IsNullOrEmpty(email)) select.Where(u => u.Email == email);
+            if (ucode != 0) select.Where(u => u.Code == ucode);
+            return select.ToList();
+        }
+
+        public void RetrievePassword(long code,string password)
+        {
+            FreeSqlHelper.Instance.Update<User>().Where(u=> u.Code == code)
+                .Set(u => u.Password, password)
+                .ExecuteAffrows();
+        }
     }
 }

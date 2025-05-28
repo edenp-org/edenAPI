@@ -116,6 +116,9 @@ namespace WebApplication3.Controllers
             {
                 work = workBiz.GetWorkByGetWorkCode(code);
                 if (work == null) throw new CustomException("没有该作品！");
+
+                if(work.AuthorCode != user.Code) throw new CustomException("没有权限修改该作品！");
+
                 work = workBiz.UpdateWork(code, title, description);
 
                 tagBiz.RemoveAllAssociatedTags(work.Code);
