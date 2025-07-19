@@ -1,4 +1,4 @@
-﻿using WebApplication3.Foundation.Helper;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
 namespace WebApplication3.Dao

@@ -1,4 +1,4 @@
-﻿namespace WebApplication3.Models.DB
+namespace WebApplication3.Models.DB
 {
     public class WorkAndTag
     {

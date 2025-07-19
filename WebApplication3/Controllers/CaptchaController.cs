@@ -1,4 +1,6 @@
-﻿using Lazy.Captcha.Core;
+using System;
+using System.Collections.Generic;
+using Lazy.Captcha.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

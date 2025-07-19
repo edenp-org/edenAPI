@@ -21,12 +21,12 @@ public class TextModerationAutoRouteHelper
             stream = false
         };
 
-        // ¹¹½¨ÉóºËÇëÇóÄÚÈİ
+        // æ„å»ºå®¡æ ¸è¯·æ±‚å†…å®¹
         var resultTemplate = BuildResultTemplate();
         textModerationRequest.messages.Add(new MessagesItem
         {
             role = "system",
-            content = $"ÄãÏÖÔÚÊÇÒ»¸öÉóºËÔ±,½ÓÏÂÀ´ÎÒ½«¸øÄãÒ»¸öÎÄ±¾£¬ÇëÄã¸æËßÎÒÕâ¸öÎÄ±¾ÊÇ·ñ°üº¬Òù»àÄÚÈİ¡¢Éæ¼°Ãô¸ĞÕşÖÎÄÚÈİ¡¢ÊÇ·ñÓĞAIÉú³ÉµÄ¿ÉÄÜĞÔ£¬Èç¹û°üº¬Çë¸æËßÎÒ°üº¬Æ¬¶Î ½á¹ûÇëÒÔ JSON µÄĞÎÊ½Êä³ö£¬Êä³öµÄ JSON Ğè×ñÊØÒÔÏÂµÄ¸ñÊ½£º{resultTemplate.ToJsonString()}"
+            content = $"ä½ ç°åœ¨æ˜¯ä¸€ä¸ªå®¡æ ¸å‘˜,æ¥ä¸‹æ¥æˆ‘å°†ç»™ä½ ä¸€ä¸ªHTMLæ–‡æœ¬ï¼Œè¯·åœ¨é€‰ç„¶åå‘Šè¯‰æˆ‘è¿™ä¸ªHTMLæ–‡æœ¬æ˜¯å¦åŒ…å«æ·«ç§½å†…å®¹ã€æ¶‰åŠæ•æ„Ÿæ”¿æ²»å†…å®¹ã€æ˜¯å¦æœ‰AIç”Ÿæˆçš„å¯èƒ½æ€§ï¼Œå¦‚æœåŒ…å«è¯·å‘Šè¯‰æˆ‘åŒ…å«ç‰‡æ®µ ç»“æœè¯·ä»¥ JSON çš„å½¢å¼è¾“å‡ºï¼Œè¾“å‡ºçš„ JSON éœ€éµå®ˆä»¥ä¸‹çš„æ ¼å¼ï¼š{resultTemplate.ToJsonString()}"
         });
 
         textModerationRequest.messages.Add(new MessagesItem
@@ -35,7 +35,7 @@ public class TextModerationAutoRouteHelper
             content = text
         });
 
-        // ·¢ËÍÇëÇó
+        // å‘é€è¯·æ±‚
         var headers = new Dictionary<string, string>
         {
             { "Authorization", $"Bearer {AI_API_KEY}" }
@@ -50,19 +50,19 @@ public class TextModerationAutoRouteHelper
     {
         return new Dictionary<string, object>
         {
-            { "AdultResultCode", "<ÊÇ·ñÉæ¼°Òù»àÄÚÈİ,0-Õı³££¬1-Î¥¹æ>" },
-            { "AdultScore", "Òù»àÄÚÈİµÄÎ¥¹æÆÀ·Ö 0-100 £¬Ô½¸ßÎ¥¹æ¸ÅÂÊ¾ÍÔ½¸ß>" },
-            { "AdultContent", new[] { "<Òù»àÄÚÈİ,Õ¹Ê¾Ô­ÎÄ£¬²»ÉèÖÃÊı×éÊıÁ¿ÉèÖÃÉÏÏŞ£¬Ğè¾¡Á¿Õ¹Ê¾ÍêÈ«>" } },
-            { "AdultEvaluate", "<Òù»àÄÚÈİµÄÆÀ¼Û£¬ËµÃ÷Î¥¹æÔ­Òò(Ê¹ÓÃ½ÏÎªÎÂºÍµÄÓïÆø)>" },
-            { "AdultSuggestion", "<Òù»àÄÚÈİµÄĞŞ¸Ä½¨Òé(Ê¹ÓÃ½ÏÎªÎÂºÍµÄÓïÆø)>" },
-            { "AIResultCode", "<ÊÇ·ñAIÉú³É,0-Õı³££¬1-Î¥¹æ>" },
-            { "AIScore", "AIÉú³ÉµÄ¸ÅÂÊÆÀ·Ö 0-100 £¬Ô½¸ßÎ¥¹æ¸ÅÂÊ¾ÍÔ½¸ß>" },
-            { "AIEvaluate", "<AIÄÚÈİµÄÆÀ¼Û£¬ËµÃ÷Î¥¹æÔ­Òò(Ê¹ÓÃ½ÏÎªÎÂºÍµÄÓïÆø)>" },
-            { "PoliticsResultCode", "<ÊÇ·ñÉæ¼°ÉæÕşÄÚÈİ,0-Õı³££¬1-Î¥¹æ>" },
-            { "PoliticsScore", "Ãô¸ĞÉæÕşÄÚÈİµÄÎ¥¹æÆÀ·Ö 0-100 £¬Ô½¸ßÎ¥¹æ¸ÅÂÊ¾ÍÔ½¸ß>" },
-            { "PoliticsContent", new[] { "<Ãô¸ĞÉæÕşÄÚÈİ,Õ¹Ê¾Ô­ÎÄ£¬²»ÉèÖÃÊı×éÊıÁ¿ÉèÖÃÉÏÏŞ£¬Ğè¾¡Á¿Õ¹Ê¾ÍêÈ«>" } },
-            { "PoliticsEvaluate", "<Ãô¸ĞÉæÕşÄÚÈİµÄÆÀ¼Û£¬ËµÃ÷Î¥¹æÔ­Òò(Ê¹ÓÃ½ÏÎªÎÂºÍµÄÓïÆø)>" },
-            { "PoliticsSuggestion", "<Ãô¸ĞÉæÕşÄÚÈİµÄĞŞ¸Ä½¨Òé(Ê¹ÓÃ½ÏÎªÎÂºÍµÄÓïÆø)>" }
+            { "AdultResultCode", "<æ˜¯å¦æ¶‰åŠæ·«ç§½å†…å®¹,0-æ­£å¸¸ï¼Œ1-è¿è§„>" },
+            { "AdultScore", "æ·«ç§½å†…å®¹çš„è¿è§„è¯„åˆ† 0-100 ï¼Œè¶Šé«˜è¿è§„æ¦‚ç‡å°±è¶Šé«˜>" },
+            { "AdultContent", new[] { "<æ·«ç§½å†…å®¹,å±•ç¤ºåŸæ–‡ï¼Œä¸è®¾ç½®æ•°ç»„æ•°é‡è®¾ç½®ä¸Šé™ï¼Œéœ€å°½é‡å±•ç¤ºå®Œå…¨>" } },
+            { "AdultEvaluate", "<æ·«ç§½å†…å®¹çš„è¯„ä»·ï¼Œè¯´æ˜è¿è§„åŸå› (ä½¿ç”¨è¾ƒä¸ºæ¸©å’Œçš„è¯­æ°”)>" },
+            { "AdultSuggestion", "<æ·«ç§½å†…å®¹çš„ä¿®æ”¹å»ºè®®(ä½¿ç”¨è¾ƒä¸ºæ¸©å’Œçš„è¯­æ°”)>" },
+            { "AIResultCode", "<æ˜¯å¦AIç”Ÿæˆ,0-æ­£å¸¸ï¼Œ1-è¿è§„>" },
+            { "AIScore", "AIç”Ÿæˆçš„æ¦‚ç‡è¯„åˆ† 0-100 ï¼Œè¶Šé«˜è¿è§„æ¦‚ç‡å°±è¶Šé«˜>" },
+            { "AIEvaluate", "<AIå†…å®¹çš„è¯„ä»·ï¼Œè¯´æ˜è¿è§„åŸå› (ä½¿ç”¨è¾ƒä¸ºæ¸©å’Œçš„è¯­æ°”)>" },
+            { "PoliticsResultCode", "<æ˜¯å¦æ¶‰åŠæ¶‰æ”¿å†…å®¹,0-æ­£å¸¸ï¼Œ1-è¿è§„>" },
+            { "PoliticsScore", "æ•æ„Ÿæ¶‰æ”¿å†…å®¹çš„è¿è§„è¯„åˆ† 0-100 ï¼Œè¶Šé«˜è¿è§„æ¦‚ç‡å°±è¶Šé«˜>" },
+            { "PoliticsContent", new[] { "<æ•æ„Ÿæ¶‰æ”¿å†…å®¹,å±•ç¤ºåŸæ–‡ï¼Œä¸è®¾ç½®æ•°ç»„æ•°é‡è®¾ç½®ä¸Šé™ï¼Œéœ€å°½é‡å±•ç¤ºå®Œå…¨>" } },
+            { "PoliticsEvaluate", "<æ•æ„Ÿæ¶‰æ”¿å†…å®¹çš„è¯„ä»·ï¼Œè¯´æ˜è¿è§„åŸå› (ä½¿ç”¨è¾ƒä¸ºæ¸©å’Œçš„è¯­æ°”)>" },
+            { "PoliticsSuggestion", "<æ•æ„Ÿæ¶‰æ”¿å†…å®¹çš„ä¿®æ”¹å»ºè®®(ä½¿ç”¨è¾ƒä¸ºæ¸©å’Œçš„è¯­æ°”)>" }
         };
     }
 
@@ -72,7 +72,7 @@ public class TextModerationAutoRouteHelper
         return Regex.Replace(input, pattern, "$1");
     }
 
-    // ÄÚ²¿Àà¶¨Òå
+    // å†…éƒ¨ç±»å®šä¹‰
     public class TextModerationRequest
     {
         public string model { get; set; }
@@ -131,55 +131,55 @@ public class TextModerationAutoRouteHelper
     public class TextModerationResponseContent
     {
         /// <summary>
-        /// ÊÇ·ñ°üº¬³ÉÈËÄÚÈİ
+        /// æ˜¯å¦åŒ…å«æˆäººå†…å®¹
         /// </summary>
         public int AdultResultCode { get; set; }
         /// <summary>
-        /// ³ÉÈËÄÚÈİÆÀ·Ö
+        /// æˆäººå†…å®¹è¯„åˆ†
         /// </summary>
         public int AdultScore { get; set; }
         /// <summary>
-        /// ³ÉÈËÄÚÈİ
+        /// æˆäººå†…å®¹
         /// </summary>
         public List<string> AdultContent { get; set; }
         /// <summary>
-        /// ³ÉÈËÄÚÈİÆÀ¼Û
+        /// æˆäººå†…å®¹è¯„ä»·
         /// </summary>
         public string AdultEvaluate { get; set; }
         /// <summary>
-        /// ³ÉÈËÄÚÈİĞŞ¸Ä½¨Òé
+        /// æˆäººå†…å®¹ä¿®æ”¹å»ºè®®
         /// </summary>
         public string AdultSuggestion { get; set; }
         /// <summary>
-        /// ÊÇ·ñÎªAIÉú³É
+        /// æ˜¯å¦ä¸ºAIç”Ÿæˆ
         /// </summary>
         public int AIResultCode { get; set; }
         /// <summary>
-        /// AIÉú³ÉÆÀ·Ö
+        /// AIç”Ÿæˆè¯„åˆ†
         /// </summary>
         public int AIScore { get; set; }
         /// <summary>
-        /// AIÄÚÈİµÄÆÀ¼Û
+        /// AIå†…å®¹çš„è¯„ä»·
         /// </summary>
         public string AIEvaluate { get; set; }
         /// <summary>
-        ///  ÊÇ·ñÉæÕş
+        ///  æ˜¯å¦æ¶‰æ”¿
         /// </summary>
         public int PoliticsResultCode { get; set; }
         /// <summary>
-        /// ÉæÕşÆÀ·Ö
+        /// æ¶‰æ”¿è¯„åˆ†
         /// </summary>
         public int PoliticsScore { get; set; }
         /// <summary>
-        /// ÉæÕşÄÚÈİ
+        /// æ¶‰æ”¿å†…å®¹
         /// </summary>
         public List<string> PoliticsContent { get; set; }
         /// <summary>
-        /// ÉæÕşÄÚÈİÆÀ¼Û
+        /// æ¶‰æ”¿å†…å®¹è¯„ä»·
         /// </summary>
         public string PoliticsEvaluate { get; set; }
         /// <summary>
-        /// ÉæÕşĞŞ¸Ä½¨Òé
+        /// æ¶‰æ”¿ä¿®æ”¹å»ºè®®
         /// </summary>
         public string PoliticsSuggestion { get; set; }
     }

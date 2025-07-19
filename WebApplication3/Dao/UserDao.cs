@@ -1,4 +1,4 @@
-﻿using WebApplication3.Foundation.Helper;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 using WebApplication3.Sundry;
 
@@ -256,6 +256,29 @@ namespace WebApplication3.Dao
         {
             FreeSqlHelper.Instance.Update<User>().Where(u=> u.Code == code)
                 .Set(u => u.Password, password)
+                .ExecuteAffrows();
+        }
+
+        public List<UserLikeWork> GetUserLikeWorkByUserId(long userCode)
+        {
+            return FreeSqlHelper.Instance
+                .Select<UserLikeWork>()
+                .Where(u => u.UserCode == userCode)
+                .ToList();
+        }
+
+        public void UpdateUser(User user)
+        {
+            // 使用 FreeSqlHelper 更新用户信息
+            FreeSqlHelper.Instance
+                .Update<User>()
+                .Set(u=>u.LofterUrl , user.LofterUrl)
+                .Set(u=>u.Gender , user.Gender)
+                .Set(u=>u.Profile , user.Profile)
+                .Set(u=>u.WeiboUrl , user.WeiboUrl)
+                .Set(u=>u.Ao3Url , user.Ao3Url)
+                .Set(u=>u.XUrl , user.XUrl)
+                .Where(u => u.Code == user.Code)
                 .ExecuteAffrows();
         }
     }

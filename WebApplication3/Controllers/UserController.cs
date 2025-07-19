@@ -1,6 +1,9 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Lazy.Captcha.Core;
 using Microsoft.AspNetCore.Mvc;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 using WebApplication3.Biz;
 using WebApplication3.Foundation;
 using WebApplication3.Foundation.Exceptions;
@@ -119,6 +122,15 @@ namespace WebApplication3.Controllers
             }
         }
 
+        public class UpdateAvatarByFileRequest
+        {
+            public RetrievePasswordRequestData data { get; set; }
+
+            public class RetrievePasswordRequestData
+            {
+                public long WorkCode { get; set; }
+            }
+        }
         #endregion
 
         private static readonly object _codeLock = new object();
@@ -165,8 +177,11 @@ namespace WebApplication3.Controllers
             if (string.IsNullOrEmpty(request.data.Uname) && string.IsNullOrEmpty(request.data.Email)) throw new CustomException("请选择登录方式");
             if (!string.IsNullOrEmpty(request.data.Uname) && !string.IsNullOrEmpty(request.data.Email)) throw new CustomException("请选择登录方式");
 
-            // 验证验证码
-            if (!captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("验证码错误！");
+            if (!ConfigHelper.GetBool("DevMode"))
+            {
+                // 验证验证码
+                if (!captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("验证码错误！");
+            }
 
             var userBiz = new UserBiz();
             var userTokenBiz = new UserTokenBiz();
@@ -310,7 +325,10 @@ namespace WebApplication3.Controllers
             if (string.IsNullOrEmpty(request.data.Email)) throw new CustomException("请输入邮箱！");
             if (string.IsNullOrEmpty(request.data.CaptchaId)) throw new CustomException("请输入验证码ID！");
             if (string.IsNullOrEmpty(request.data.CaptchaInput)) throw new CustomException("请输入验证码！");
-            if (!captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("错误的验证码");
+            if (!ConfigHelper.GetBool("DevMode"))
+            {
+                if (!captcha.Validate(request.data.CaptchaId, request.data.CaptchaInput)) throw new CustomException("错误的验证码");
+            }
 
             // 生成验证码
             var token = new Random().Next(100000, 999999).ToString();
@@ -404,7 +422,7 @@ namespace WebApplication3.Controllers
 
             UserBiz userBiz = new UserBiz();
             var favoriteTags = userBiz.GetUserFavoriteTagByUserId(user.Code, tag.Id);
-            if (favoriteTags == null) throw new CustomException("已添加该标签！");
+            if (favoriteTags != null) throw new CustomException("已添加该标签！");
             userBiz.AddUserFavoriteTag(new UserFavoriteTag
             {
                 TagCode = tag.Code,
@@ -560,6 +578,130 @@ namespace WebApplication3.Controllers
 
             dic.Add("status", 200);
             dic.Add("message", "成功");
+            return dic;
+        }
+
+        /// <summary>
+        /// 获取用户喜欢的作品
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(false), HttpPost("GetUserLikeWork")]
+        public Dictionary<string, object> GetUserLikeWork()
+        {
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            var user = UserHelper.GetUserFromContext(HttpContext);
+            UserBiz userBiz = new UserBiz();
+            var list = userBiz.GetUserLikeWorkByUserId(user.Code);
+
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", list.Select(i => new
+            {
+                i.WorkCode,
+                i.UserCode,
+                i.WorkTitle
+            }));
+            return dic;
+        }
+
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="CustomException"></exception>
+        [Authorize(false), HttpGet("GetUserInfo")]
+        public Dictionary<string, object> GetUserInfo(long ucode = 0)
+        {
+            var dic = new Dictionary<string, object>();
+            var user = UserHelper.GetUserFromContext(HttpContext);
+            if (ucode > 0)
+            {
+                user = new UserBiz().GetUserByCode(ucode);
+            }
+            else
+            {
+                if (user == null) throw new CustomException("用户未登录！");
+            }
+
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", new
+            {
+                user.Code,
+                user.Username,
+                user.Email,
+                user.Role,
+                user.ExamineCount,
+                user.Ao3Url,
+                user.XUrl,
+                user.WeiboUrl,
+                user.LofterUrl,
+                user.Gender
+            });
+            return dic;
+        }
+
+        [Authorize(false), HttpPost("UpdateAvatarByFile")]
+        public async Task<Dictionary<string, object>> UpdateAvatarByFile(IFormFile avatar)
+        {
+            var dic = new Dictionary<string, object>();
+            var user = UserHelper.GetUserFromContext(HttpContext);
+            if (avatar == null || avatar.Length == 0) throw new CustomException("请上传头像文件！");
+
+            var userDir = Path.Combine("wwwroot", "avatars", user.Code.ToString());
+            Directory.CreateDirectory(userDir);
+            var fileName = "avatar.png";
+            var savePath = Path.Combine(userDir, fileName);
+
+            using (var stream = avatar.OpenReadStream())
+            using (var image = await Image.LoadAsync(stream))
+            {
+                // 可选：可对图片进行裁剪、缩放等处理
+                await image.SaveAsPngAsync(savePath, new PngEncoder());
+            }
+
+            var avatarUrl = $"/avatars/{user.Code}/{fileName}";
+
+            dic.Add("status", 200);
+            dic.Add("message", "头像更新成功");
+            dic.Add("avatarUrl", avatarUrl);
+            return dic;
+        }
+
+        public class UpdateUserInfoRequest
+        {
+            public UpdateUserInfoData data { get; set; }
+
+            public class UpdateUserInfoData
+            {
+                public string Ao3Url { get; set; }
+                public string XUrl { get; set; }
+                public string WeiboUrl { get; set; }
+                public string LofterUrl { get; set; }
+                public string Gender { get; set; }
+                public string Profile { get; set; }
+            }
+        }
+
+        [Authorize(false), HttpPost("UpdateUserInfo")]
+        public Dictionary<string, object> UpdateUserInfo([FromBody] UpdateUserInfoRequest request)
+        {
+            var dic = new Dictionary<string, object>();
+            var user = UserHelper.GetUserFromContext(HttpContext);
+            if (user == null) throw new CustomException("用户未登录！");
+
+            var userBiz = new UserBiz();
+            user.Ao3Url = request.data.Ao3Url;
+            user.XUrl = request.data.XUrl;
+            user.WeiboUrl = request.data.WeiboUrl;
+            user.LofterUrl = request.data.LofterUrl;
+            user.Gender = request.data.Gender;
+            user.Profile = request.data.Profile;
+
+            userBiz.UpdateUser(user);
+
+            dic.Add("status", 200);
+            dic.Add("message", "用户信息更新成功");
             return dic;
         }
     }

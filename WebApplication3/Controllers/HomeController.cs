@@ -36,14 +36,14 @@ namespace WebApplication3.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
-            // ÔÚÕâÀïÌí¼ÓÄúµÄµÇÂ¼Âß¼­
+            // åœ¨è¿™é‡Œæ·»åŠ æ‚¨çš„ç™»å½•é€»è¾‘
             if (username == "admin" && password == "password")
             {
-                // µÇÂ¼³É¹¦£¬ÖØ¶¨Ïòµ½Ö÷Ò³
+                // ç™»å½•æˆåŠŸï¼Œé‡å®šå‘åˆ°ä¸»é¡µ
                 return RedirectToAction("Index");
             }
 
-            // µÇÂ¼Ê§°Ü£¬·µ»ØµÇÂ¼Ò³²¢ÏÔÊ¾´íÎóĞÅÏ¢
+            // ç™»å½•å¤±è´¥ï¼Œè¿”å›ç™»å½•é¡µå¹¶æ˜¾ç¤ºé”™è¯¯ä¿¡æ¯
             ViewBag.ErrorMessage = "Invalid username or password";
             return View();
         }

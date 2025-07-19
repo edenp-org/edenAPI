@@ -7,41 +7,41 @@ public class HttpHelper
     private static readonly HttpClient client = new HttpClient();
 
     /// <summary>
-    /// ·¢ËÍHTTP GETÇëÇó
+    /// å‘é€HTTP GETè¯·æ±‚
     /// </summary>
-    /// <param name="url">ÇëÇóµÄURL</param>
-    /// <returns>·µ»ØÏìÓ¦ÄÚÈİ</returns>
+    /// <param name="url">è¯·æ±‚çš„URL</param>
+    /// <returns>è¿”å›å“åº”å†…å®¹</returns>
     public static string HttpGet(string url)
     {
         try
         {
             HttpResponseMessage response = client.GetAsync(url).Result;
-            response.EnsureSuccessStatusCode(); // È·±£ÇëÇó³É¹¦
+            response.EnsureSuccessStatusCode(); // ç¡®ä¿è¯·æ±‚æˆåŠŸ
             return response.Content.ReadAsStringAsync().Result;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"GETÇëÇó³ö´í: {ex.Message}");
+            Console.WriteLine($"GETè¯·æ±‚å‡ºé”™: {ex.Message}");
             return null;
         }
     }
 
     /// <summary>
-    /// ·¢ËÍHTTP POSTÇëÇó
+    /// å‘é€HTTP POSTè¯·æ±‚
     /// </summary>
-    /// <param name="url">ÇëÇóµÄURL</param>
-    /// <param name="postData">ÇëÇóµÄÄÚÈİ</param>
-    /// <returns>·µ»ØÏìÓ¦ÄÚÈİ</returns>
+    /// <param name="url">è¯·æ±‚çš„URL</param>
+    /// <param name="postData">è¯·æ±‚çš„å†…å®¹</param>
+    /// <returns>è¿”å›å“åº”å†…å®¹</returns>
     public static string HttpPost(string url, string postData,Dictionary<string,string> headers)
     {
         try
         {
             using (var request = new HttpRequestMessage(HttpMethod.Post, url))
             {
-                // ÉèÖÃÇëÇóÄÚÈİ
+                // è®¾ç½®è¯·æ±‚å†…å®¹
                 request.Content = new StringContent(postData, Encoding.UTF8, "application/json");
 
-                // Ìí¼Ó×Ô¶¨Òå headers
+                // æ·»åŠ è‡ªå®šä¹‰ headers
                 if (headers != null)
                 {
                     foreach (var header in headers)
@@ -50,15 +50,15 @@ public class HttpHelper
                     }
                 }
 
-                // ·¢ËÍÇëÇó
+                // å‘é€è¯·æ±‚
                 HttpResponseMessage response = client.SendAsync(request).Result;
-                response.EnsureSuccessStatusCode(); // È·±£ÇëÇó³É¹¦
+                response.EnsureSuccessStatusCode(); // ç¡®ä¿è¯·æ±‚æˆåŠŸ
                 return response.Content.ReadAsStringAsync().Result;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"POSTÇëÇó³ö´í: {ex.Message}");
+            Console.WriteLine($"POSTè¯·æ±‚å‡ºé”™: {ex.Message}");
             return null;
         }
     }

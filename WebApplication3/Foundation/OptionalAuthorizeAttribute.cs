@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc.Filters;
 using WebApplication3.Biz;
 using WebApplication3.Foundation.Helper;
@@ -27,7 +28,7 @@ public class OptionalAuthorizeAttribute : Attribute, IAuthorizationFilter
 
                         if (user != null)
                         {
-                            // ½«ÓÃ»§ĞÅÏ¢´æ´¢ÔÚ HttpContext.Items ÖĞ
+                            // å°†ç”¨æˆ·ä¿¡æ¯å­˜å‚¨åœ¨ HttpContext.Items ä¸­
                             context.HttpContext.Items["UserId"] = user.Id;
                             context.HttpContext.Items["Uname"] = user.Username;
                             context.HttpContext.Items["Code"] = user.Code;
@@ -38,7 +39,7 @@ public class OptionalAuthorizeAttribute : Attribute, IAuthorizationFilter
         }
         catch
         {
-            // ºöÂÔÒì³££¬²»Ç¿ÖÆÉí·İÈÏÖ¤
+            // å¿½ç•¥å¼‚å¸¸ï¼Œä¸å¼ºåˆ¶èº«ä»½è®¤è¯
         }
     }
 }

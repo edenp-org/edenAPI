@@ -1,4 +1,4 @@
-﻿using FreeSql.DataAnnotations;
+using FreeSql.DataAnnotations;
 
 namespace WebApplication3.Models.DB
 {
@@ -40,9 +40,40 @@ namespace WebApplication3.Models.DB
         public string Confuse { get; set; }
 
         /// <summary>
+        /// 用户简介
+        /// </summary>
+        public string Profile { get; set; }
+
+        /// <summary>
+        /// 用户性别
+        /// </summary>
+        public string Gender { get; set; }
+
+        /// <summary>
+        /// 老福特主页地址
+        /// </summary>
+        public string LofterUrl { get; set; }
+
+        /// <summary>
+        /// 微博主页地址
+        /// </summary>
+        public string WeiboUrl { get; set; }
+
+        /// <summary>
+        /// AO3主页地址
+        /// </summary>
+        public string Ao3Url { get; set; }
+
+        /// <summary>
+        /// X（推特）主页地址
+        /// </summary>
+        public string XUrl { get; set; }
+
+        /// <summary>
         /// 用户角色
         /// </summary>
         public int Role { get; set; }
+
         /// <summary>
         /// 审核次数，每次进行审核，都+1
         /// </summary>

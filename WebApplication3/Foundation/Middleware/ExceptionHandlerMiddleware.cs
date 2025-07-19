@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using WebApplication3.Foundation.Exceptions;
 using WebApplication3.Foundation.Helper;
 
@@ -24,20 +28,26 @@ public class ExceptionHandlerMiddleware(RequestDelegate next)
         context.Response.StatusCode = (int)HttpStatusCode.OK;
         Dictionary<string, object> result = new Dictionary<string, object>();
         long timestampInMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        if (exception is CustomException ex)
+        if (exception is CustomException customException)
         {
             result.Add("status", 400);
-            result.Add("message", ex.Message);
+            result.Add("message", customException.Message);
+        }
+        else if(exception is AuthenticationException authenticationException)
+        {
+            result.Add("status", 400);
+            result.Add("message", authenticationException.Message);
+            context.Response.StatusCode = 401;
         }
         else
         {
             result.Add("status", 400);
-            result.Add("message", "ÏµÍ³´íÎó£¡");
+            result.Add("message", "ç³»ç»Ÿé”™è¯¯ï¼");
             result.Add("errDate", timestampInMilliseconds);
             result.Add("hResult", exception.HResult);
         }
 
-        NLogHelper.Error($"´íÎóÊ±¼ä£º{timestampInMilliseconds}´íÎó´úÂë:{exception.HResult}", exception);
+        NLogHelper.Error($"é”™è¯¯æ—¶é—´ï¼š{timestampInMilliseconds}é”™è¯¯ä»£ç :{exception.HResult}", exception);
         return context.Response.WriteAsJsonAsync(result);
     }
 }

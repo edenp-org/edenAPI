@@ -3,7 +3,7 @@ namespace WebApplication3.Foundation.Helper;
 public static class DateTimeExtensions
 {
     /// <summary>
-    /// ½« DateTime ×ª»»Îª Unix Ê±¼ä´Á£¨Ãë£©
+    /// å°† DateTime è½¬æ¢ä¸º Unix æ—¶é—´æˆ³ï¼ˆç§’ï¼‰
     /// </summary>
     public static long ToUnixTimeSeconds(this DateTime dateTime)
     {
@@ -11,7 +11,7 @@ public static class DateTimeExtensions
     }
 
     /// <summary>
-    /// ½« DateTime ×ª»»Îª Unix Ê±¼ä´Á£¨ºÁÃë£©
+    /// å°† DateTime è½¬æ¢ä¸º Unix æ—¶é—´æˆ³ï¼ˆæ¯«ç§’ï¼‰
     /// </summary>
     public static long ToUnixTimeMilliseconds(this DateTime dateTime)
     {

@@ -25,18 +25,18 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         }
 
         userBiz.IncreasExamineCount(user.Code);
-        if (1000 - user.ExamineCount <= 0) throw new CustomException("ÉóºË´ÎÊıÒÑÓÃÍê£¡");
+        if (1000 - user.ExamineCount <= 0) throw new CustomException("å®¡æ ¸æ¬¡æ•°å·²ç”¨å®Œï¼");
 
         Dictionary<string, object> dic = new Dictionary<string, object>();
-        if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString())) throw new CustomException("Ã»ÓĞÈë²Î£¡");
+        if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString())) throw new CustomException("æ²¡æœ‰å…¥å‚ï¼");
         Dictionary<string, object> data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
 
-        if (!data.TryGetValue("workcode", out var workCodeObj) || string.IsNullOrEmpty(workCodeObj.ToString()) || !long.TryParse(workCodeObj.ToString(), out long workCode)) throw new CustomException("Î´»ñÈ¡µ½ÎÄÕÂcode£¡");
+        if (!data.TryGetValue("workcode", out var workCodeObj) || string.IsNullOrEmpty(workCodeObj.ToString()) || !long.TryParse(workCodeObj.ToString(), out long workCode)) throw new CustomException("æœªè·å–åˆ°æ–‡ç« codeï¼");
 
         WorkBiz workBiz = new WorkBiz();
         var work = workBiz.GetWorkByGetWorkCode(workCode);
-        if (work == null) throw new CustomException("Ã»ÓĞ¸Ã×÷Æ·£¡");
-        if (work.AuthorCode != user.Code) throw new CustomException("¸Ã×÷Æ·²»ÊôÓÚÄú£¡");
+        if (work == null) throw new CustomException("æ²¡æœ‰è¯¥ä½œå“ï¼");
+        if (work.AuthorCode != user.Code) throw new CustomException("è¯¥ä½œå“ä¸å±äºæ‚¨ï¼");
 
         var root = Path.Combine(env.WebRootPath, "Work", user.Code.ToString());
         if (!Directory.Exists(root)) Directory.CreateDirectory(root);
@@ -47,7 +47,7 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
 
         bool isExamine = false;
 
-        if (textModerationResponse.choices == null || textModerationResponse.choices.Count == 0) throw new CustomException("Î´»ñÈ¡µ½ÉóºË½á¹û£¡");
+        if (textModerationResponse.choices == null || textModerationResponse.choices.Count == 0) throw new CustomException("æœªè·å–åˆ°å®¡æ ¸ç»“æœï¼");
         var msgTextModerationResponseContent = textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>();
         if ((msgTextModerationResponseContent.PoliticsResultCode != 1 && msgTextModerationResponseContent.PoliticsScore < 50) &&
             (msgTextModerationResponseContent.AdultResultCode != 1 && msgTextModerationResponseContent.AdultScore < 50))
@@ -69,7 +69,7 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         });
 
         dic.Add("status", 200);
-        dic.Add("message", "³É¹¦");
+        dic.Add("message", "æˆåŠŸ");
         dic.Add("data", msgTextModerationResponseContent);
         return dic;
     }
@@ -87,7 +87,7 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         return new Dictionary<string, object>()
         {
             { "status", 200 },
-            { "message", "³É¹¦" },
+            { "message", "æˆåŠŸ" },
             {
                 "data", new Dictionary<string, object>()
                 {

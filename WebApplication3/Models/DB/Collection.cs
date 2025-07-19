@@ -3,40 +3,40 @@ using FreeSql.DataAnnotations;
 namespace WebApplication3.Models.DB
 {
     /// <summary>
-    /// ºÏ¼¯Àà£¬±íÊ¾Êı¾İ¿âÖĞµÄºÏ¼¯±í
+    /// åˆé›†ç±»ï¼Œè¡¨ç¤ºæ•°æ®åº“ä¸­çš„åˆé›†è¡¨
     /// </summary>
     public class Collection
     {
         /// <summary>
-        /// ºÏ¼¯ID£¬Ö÷¼ü£¬×ÔÔö
+        /// åˆé›†IDï¼Œä¸»é”®ï¼Œè‡ªå¢
         /// </summary>
         [Column(IsIdentity = true, IsPrimary = true)]
         public long Id { get; set; }
 
         /// <summary>
-        /// ºÏ¼¯Ãû³Æ
+        /// åˆé›†åç§°
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// ºÏ¼¯ÃèÊö
+        /// åˆé›†æè¿°
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// ´´½¨Ê±¼ä
+        /// åˆ›å»ºæ—¶é—´
         /// </summary>
         public DateTime CreatedAt { get; set; }
 
         public long Code { get; set; }
 
         /// <summary>
-        /// ´´½¨ÕßCode
+        /// åˆ›å»ºè€…Code
         /// </summary>
         public long UCode { get; set; }
 
         /// <summary>
-        /// ´´½¨ÕßÃû³Æ
+        /// åˆ›å»ºè€…åç§°
         /// </summary>
         public string UName { get; set; }
     }
