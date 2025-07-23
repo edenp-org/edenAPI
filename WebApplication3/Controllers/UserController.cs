@@ -704,5 +704,31 @@ namespace WebApplication3.Controllers
             dic.Add("message", "用户信息更新成功");
             return dic;
         }
+        [HttpGet("GetUserArticles")]
+        public Dictionary<string, object> GetUserWorks(long uCode=0, int pageIndex = 0, int pageSize = 0)
+        {
+            var dic = new Dictionary<string, object>();
+            if (uCode == 0 || pageIndex == 0 || pageSize == 0)
+                throw new CustomException("用户编号、页码和每页数量不能为空或为0！");
+
+            var userBiz = new UserBiz();
+            var user = userBiz.GetUserByCode(uCode);
+            if (user == null) throw new CustomException("没有该用户！");
+
+            var workBiz = new WorkBiz();
+            var works = workBiz.GetWorksByUserCode(uCode, pageIndex, pageSize);
+
+            dic.Add("status", 200);
+            dic.Add("message", "成功");
+            dic.Add("data", new
+            {
+                total = works.Total,
+                pageIndex,
+                pageSize,
+                works = works.Data
+            });
+            return dic;
+        }
+
     }
 }

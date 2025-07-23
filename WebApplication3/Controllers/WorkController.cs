@@ -303,7 +303,10 @@ namespace WebApplication3.Controllers
             {
                 a.Code,
                 a.Tags,
-                a.Description
+                a.Description,
+                a.AuthorName,
+                a.AuthorCode
+
             }));
             return dic;
         }

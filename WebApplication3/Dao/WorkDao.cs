@@ -98,5 +98,13 @@ namespace WebApplication3.Dao
                 .ExecuteAffrows();
             return GetWorkByGetWorkCode(workCode);
         }
+
+        public (List<Work> Data, long Total) GetWorksByUserCode(long uCode, int pageIndex, int pageSize)
+        {
+            var query = FreeSqlHelper.Instance.Select<Work>().Where(w => w.AuthorCode == uCode);
+            var total = query.Count();
+            var data = query.Page(pageIndex, pageSize).ToList();
+            return (data, total);
+        }
     }
 }

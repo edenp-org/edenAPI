@@ -65,5 +65,10 @@ namespace WebApplication3.Biz
         {
            return workDao.UpdateWork(workcode, title, dscription);
         }
+
+        public (List<Work> Data, long Total) GetWorksByUserCode(long uCode, int pageIndex, int pageSize)
+        {
+            return workDao.GetWorksByUserCode(uCode, pageIndex, pageSize);
+        }
     }
 }
