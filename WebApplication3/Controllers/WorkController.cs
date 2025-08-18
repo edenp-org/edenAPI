@@ -305,8 +305,9 @@ namespace WebApplication3.Controllers
                 a.Tags,
                 a.Description,
                 a.AuthorName,
-                a.AuthorCode
-
+                a.AuthorCode,
+                a.Title,
+                Avatar = $"/avatars/{a.AuthorCode}/avatar.png"
             }));
             return dic;
         }

@@ -704,7 +704,7 @@ namespace WebApplication3.Controllers
             dic.Add("message", "用户信息更新成功");
             return dic;
         }
-        [HttpGet("GetUserArticles")]
+        [HttpGet("GetUserWorks")]
         public Dictionary<string, object> GetUserWorks(long uCode=0, int pageIndex = 0, int pageSize = 0)
         {
             var dic = new Dictionary<string, object>();
