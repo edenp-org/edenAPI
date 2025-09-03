@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WebApplication3.Foundation.Helper;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using WebApplication3.Foundation;
 using WebApplication3.Foundation.Middleware;
 
 namespace WebApplication3
@@ -76,6 +77,10 @@ namespace WebApplication3
                 });
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlerMiddleware>();
+
+
+            app.UseRequestLogging();
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -88,6 +93,8 @@ namespace WebApplication3
             app.UseStaticFiles();
 
             app.UseRouting();
+
+
 
             app.UseAuthorization();
             // 使用 CORS 中间件
