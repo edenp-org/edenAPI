@@ -1,4 +1,4 @@
-﻿using WebApplication3.Dao;
+using WebApplication3.Dao;
 using WebApplication3.Models.DB;
 
 namespace WebApplication3.Biz

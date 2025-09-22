@@ -17,14 +17,14 @@ namespace WebApplication3.Foundation.Helper
 
             if (string.IsNullOrEmpty(userId) || !long.TryParse(uCode, out long uCodeLong))
             {
-                throw new CustomException("用户未授权！");
+                throw new CustomException("鐢ㄦ埛鏈巿鏉冿紒");
             }
 
             var userBiz = new UserBiz();
             var user = userBiz.GetUserByCode(uCodeLong);
             if (user == null)
             {
-                throw new CustomException("用户不存在！");
+                throw new CustomException("鐢ㄦ埛涓嶅瓨鍦紒");
             }
 
             return user;

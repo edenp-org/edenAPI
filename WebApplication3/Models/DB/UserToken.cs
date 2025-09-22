@@ -1,4 +1,4 @@
-﻿using FreeSql.DataAnnotations;
+using FreeSql.DataAnnotations;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 

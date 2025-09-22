@@ -20,40 +20,40 @@ public class CollectionController : Controller
         _env = env;
     }
 
-    // ÇëÇóÀà£¬ÓÃÓÚ½ÓÊÕÌí¼ÓĞÂºÏ¼¯µÄÇëÇóÊı¾İ
+    // è¯·æ±‚ç±»ï¼Œç”¨äºæ¥æ”¶æ·»åŠ æ–°åˆé›†çš„è¯·æ±‚æ•°æ®
     public class AddNewCollectionRequest
     {
         public AddNewCollectionRequestData data { get; set; }
 
         public class AddNewCollectionRequestData
         {
-            public string Name { get; set; } // ºÏ¼¯Ãû³Æ
-            public string Description { get; set; } // ºÏ¼¯ÃèÊö
+            public string Name { get; set; } // åˆé›†åç§°
+            public string Description { get; set; } // åˆé›†æè¿°
         }
     }
 
     /// <summary>
-    /// Ìí¼ÓĞÂºÏ¼¯
+    /// æ·»åŠ æ–°åˆé›†
     /// </summary>
-    /// <param name="request">°üº¬ºÏ¼¯Ãû³ÆºÍÃèÊöµÄÇëÇóÊı¾İ</param>
-    /// <returns>²Ù×÷½á¹ûµÄ×Öµä</returns>
+    /// <param name="request">åŒ…å«åˆé›†åç§°å’Œæè¿°çš„è¯·æ±‚æ•°æ®</param>
+    /// <returns>æ“ä½œç»“æœçš„å­—å…¸</returns>
     [Authorize(false), HttpPost("AddNewCollection")]
     public Dictionary<string, object> AddNewCollection([FromBody] AddNewCollectionRequest request)
     {
         var dic = new Dictionary<string, object>();
 
-        // ¼ì²éÊäÈë²ÎÊı
-        if (request == null) throw new CustomException("Ã»ÓĞÈë²Î£¡");
-        if (string.IsNullOrEmpty(request.data.Name)) throw new CustomException("Ã»ÓĞºÏ¼¯Ãû³Æ£¡");
-        if (string.IsNullOrEmpty(request.data.Description)) throw new CustomException("Ã»ÓĞºÏ¼¯¼ò½é£¡");
+        // æ£€æŸ¥è¾“å…¥å‚æ•°
+        if (request == null) throw new CustomException("æ²¡æœ‰å…¥å‚ï¼");
+        if (string.IsNullOrEmpty(request.data.Name)) throw new CustomException("æ²¡æœ‰åˆé›†åç§°ï¼");
+        if (string.IsNullOrEmpty(request.data.Description)) throw new CustomException("æ²¡æœ‰åˆé›†ç®€ä»‹ï¼");
 
-        // »ñÈ¡µ±Ç°ÓÃ»§ĞÅÏ¢
+        // è·å–å½“å‰ç”¨æˆ·ä¿¡æ¯
         var user = UserHelper.GetUserFromContext(HttpContext);
 
         CollectionBiz collectionBiz = new CollectionBiz();
         lock (_lock)
         {
-            // Ìí¼ÓĞÂºÏ¼¯
+            // æ·»åŠ æ–°åˆé›†
             collectionBiz.AddNewCollection(new Collection()
             {
                 Name = request.data.Name,
@@ -65,78 +65,78 @@ public class CollectionController : Controller
             });
         }
 
-        dic.Add("status", 200); // ³É¹¦×´Ì¬
-        dic.Add("message", "³É¹¦");
+        dic.Add("status", 200); // æˆåŠŸçŠ¶æ€
+        dic.Add("message", "æˆåŠŸ");
         return dic;
     }
 
     /// <summary>
-    /// ½«×÷Æ·Ìí¼Óµ½ºÏ¼¯
+    /// å°†ä½œå“æ·»åŠ åˆ°åˆé›†
     /// </summary>
-    /// <param name="pairs">°üº¬ºÏ¼¯´úÂë¡¢×÷Æ·´úÂëºÍÅÅĞòµÄ×Öµä</param>
-    /// <returns>²Ù×÷½á¹ûµÄ×Öµä</returns>
+    /// <param name="pairs">åŒ…å«åˆé›†ä»£ç ã€ä½œå“ä»£ç å’Œæ’åºçš„å­—å…¸</param>
+    /// <returns>æ“ä½œç»“æœçš„å­—å…¸</returns>
     [Authorize(false), HttpPost("AddWorkToCollection")]
     public Dictionary<string, object> AddWorkToCollection([FromBody] Dictionary<string, object> pairs)
     {
         Dictionary<string, object> dic = new Dictionary<string, object>();
-        // ¼ì²éÊäÈë²ÎÊı
-        if (!pairs.TryGetValue("data", out object dataObj)) throw new CustomException("Ã»ÓĞÈë²Î£¡");
+        // æ£€æŸ¥è¾“å…¥å‚æ•°
+        if (!pairs.TryGetValue("data", out object dataObj)) throw new CustomException("æ²¡æœ‰å…¥å‚ï¼");
         var data = dataObj.ToString().FromJsonString<Dictionary<string, string>>();
-        if (!data.TryGetValue("CollectionCode", out string collectionCode)) throw new CustomException("Ã»ÓĞºÏ¼¯´úÂë");
-        if (!data.TryGetValue("WorkCode", out string workCode)) throw new CustomException("Ã»ÓĞ×÷Æ·´úÂë");
+        if (!data.TryGetValue("CollectionCode", out string collectionCode)) throw new CustomException("æ²¡æœ‰åˆé›†ä»£ç ");
+        if (!data.TryGetValue("WorkCode", out string workCode)) throw new CustomException("æ²¡æœ‰ä½œå“ä»£ç ");
         if (!data.TryGetValue("CollectionOrder", out string CollectionOrder)) CollectionOrder = "0";
 
-        // »ñÈ¡µ±Ç°ÓÃ»§ĞÅÏ¢
+        // è·å–å½“å‰ç”¨æˆ·ä¿¡æ¯
         var user = UserHelper.GetUserFromContext(HttpContext);
 
         CollectionBiz collectionBiz = new CollectionBiz();
         WorkBiz workBiz = new WorkBiz();
 
-        // ¼ì²é×÷Æ·ÊÇ·ñ´æÔÚ
-        if (workBiz.GetWorkByGetWorkCode(long.Parse(workCode)) == null) throw new CustomException("Ã»ÓĞ²éÑ¯µ½×÷Æ·");
+        // æ£€æŸ¥ä½œå“æ˜¯å¦å­˜åœ¨
+        if (workBiz.GetWorkByGetWorkCode(long.Parse(workCode)) == null) throw new CustomException("æ²¡æœ‰æŸ¥è¯¢åˆ°ä½œå“");
 
         lock (_lock)
         {
-            // Ìí¼Ó×÷Æ·µ½ºÏ¼¯
+            // æ·»åŠ ä½œå“åˆ°åˆé›†
             collectionBiz.AddWorkToCollection(long.Parse(collectionCode), long.Parse(workCode), collectionBiz.GetCollectionOrderMax(long.Parse(collectionCode)));
         }
 
-        dic.Add("status", 200); // ³É¹¦×´Ì¬
-        dic.Add("message", "³É¹¦");
+        dic.Add("status", 200); // æˆåŠŸçŠ¶æ€
+        dic.Add("message", "æˆåŠŸ");
         return dic;
     }
 
     /// <summary>
-    /// ¸ù¾İºÏ¼¯´úÂë»ñÈ¡×÷Æ·ÁĞ±í
+    /// æ ¹æ®åˆé›†ä»£ç è·å–ä½œå“åˆ—è¡¨
     /// </summary>
-    /// <param name="collectionCode">ºÏ¼¯´úÂë</param>
-    /// <returns>°üº¬×÷Æ·ÁĞ±íµÄ×Öµä</returns>
+    /// <param name="collectionCode">åˆé›†ä»£ç </param>
+    /// <returns>åŒ…å«ä½œå“åˆ—è¡¨çš„å­—å…¸</returns>
     [HttpGet("GetWorkByCollectionCode")]
     public Dictionary<string, object> GetWorkByCollectionCode(long collectionCode)
     {
         var dic = new Dictionary<string, object>();
 
-        // ¼ì²éÊäÈë²ÎÊı
-        if (collectionCode == 0) throw new CustomException("Ã»ÓĞºÏ¼¯´úÂë£¡");
+        // æ£€æŸ¥è¾“å…¥å‚æ•°
+        if (collectionCode == 0) throw new CustomException("æ²¡æœ‰åˆé›†ä»£ç ï¼");
 
         var workBiz = new WorkBiz();
         CollectionBiz collectionBiz = new CollectionBiz();
 
-        // »ñÈ¡ºÏ¼¯ĞÅÏ¢
+        // è·å–åˆé›†ä¿¡æ¯
         var collection = collectionBiz.GetCollectionByCode(collectionCode);
 
-        // »ñÈ¡×÷Æ·ÁĞ±í
+        // è·å–ä½œå“åˆ—è¡¨
         var workList = collectionBiz.GetWorkByCollectionCode(collectionCode);
-        if (workList == null) throw new CustomException("Î´²éÑ¯µ½Êı¾İ£¡");
+        if (workList == null) throw new CustomException("æœªæŸ¥è¯¢åˆ°æ•°æ®ï¼");
 
-        dic.Add("status", 200); // ³É¹¦×´Ì¬
-        dic.Add("message", "³É¹¦");
+        dic.Add("status", 200); // æˆåŠŸçŠ¶æ€
+        dic.Add("message", "æˆåŠŸ");
         dic.Add("data", workList.Select(a => new
         {
-            a.Code, // ×÷Æ·´úÂë
-            a.Tags, // ×÷Æ·±êÇ©
-            a.Description, // ×÷Æ·ÃèÊö
-            a.CollectionOrder // ºÏ¼¯ÅÅĞò
+            a.Code, // ä½œå“ä»£ç 
+            a.Tags, // ä½œå“æ ‡ç­¾
+            a.Description, // ä½œå“æè¿°
+            a.CollectionOrder // åˆé›†æ’åº
         }).ToList());
 
         return dic;

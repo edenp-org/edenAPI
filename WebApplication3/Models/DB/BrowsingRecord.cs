@@ -1,4 +1,5 @@
-﻿using FreeSql.DataAnnotations;
+using System;
+using FreeSql.DataAnnotations;
 
 namespace WebApplication3.Models.DB
 {

@@ -11,4 +11,11 @@ public class ExamineRecordDao
             .Insert<ExamineRecord>(record)
             .ExecuteAffrows();
     }
+    public List<ExamineRecord> GetExamineRecords(long WorkCode)
+    {
+        return FreeSqlHelper.Instance
+            .Select<ExamineRecord>()
+            .Where(t => t.WorkCode == WorkCode)
+            .ToList();
+    }
 }

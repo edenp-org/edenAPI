@@ -55,7 +55,7 @@ nunit-*.xml
 
 #无需提交
 WebApplication3/wwwroot/Work/
-
+WebApplication3/wwwroot/avatars/
 # VS
 .vs/
 .idea/

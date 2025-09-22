@@ -25,18 +25,18 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         }
 
         userBiz.IncreasExamineCount(user.Code);
-        if (1000 - user.ExamineCount <= 0) throw new CustomException("…Û∫À¥Œ ˝“—”√ÕÍ£°");
+        if (1000 - user.ExamineCount <= 0) throw new CustomException("ÂÆ°Ê†∏Ê¨°Êï∞Â∑≤Áî®ÂÆåÔºÅ");
 
         Dictionary<string, object> dic = new Dictionary<string, object>();
-        if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString())) throw new CustomException("√ª”–»Î≤Œ£°");
+        if (!pairs.TryGetValue("data", out var dataObj) || string.IsNullOrEmpty(dataObj.ToString())) throw new CustomException("Ê≤°ÊúâÂÖ•ÂèÇÔºÅ");
         Dictionary<string, object> data = dataObj.ToString().FromJsonString<Dictionary<string, object>>();
 
-        if (!data.TryGetValue("workcode", out var workCodeObj) || string.IsNullOrEmpty(workCodeObj.ToString()) || !long.TryParse(workCodeObj.ToString(), out long workCode)) throw new CustomException("Œ¥ªÒ»°µΩŒƒ’¬code£°");
+        if (!data.TryGetValue("workcode", out var workCodeObj) || string.IsNullOrEmpty(workCodeObj.ToString()) || !long.TryParse(workCodeObj.ToString(), out long workCode)) throw new CustomException("Êú™Ëé∑ÂèñÂà∞ÊñáÁ´†codeÔºÅ");
 
         WorkBiz workBiz = new WorkBiz();
         var work = workBiz.GetWorkByGetWorkCode(workCode);
-        if (work == null) throw new CustomException("√ª”–∏√◊˜∆∑£°");
-        if (work.AuthorCode != user.Code) throw new CustomException("∏√◊˜∆∑≤ª Ù”⁄ƒ˙£°");
+        if (work == null) throw new CustomException("Ê≤°ÊúâËØ•‰ΩúÂìÅÔºÅ");
+        if (work.AuthorCode != user.Code) throw new CustomException("ËØ•‰ΩúÂìÅ‰∏çÂ±û‰∫éÊÇ®ÔºÅ");
 
         var root = Path.Combine(env.WebRootPath, "Work", user.Code.ToString());
         if (!Directory.Exists(root)) Directory.CreateDirectory(root);
@@ -45,25 +45,32 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         TextModerationAutoRouteHelper textModerationAutoRouteHelper = new TextModerationAutoRouteHelper();
         TextModerationAutoRouteHelper.TextModerationResponse textModerationResponse = textModerationAutoRouteHelper.Examine(content);
 
+        bool isExamine = false;
 
-        if (textModerationResponse.choices == null || textModerationResponse.choices.Count == 0) throw new CustomException("Œ¥ªÒ»°µΩ…Û∫ÀΩ·π˚£°");
-
+        if (textModerationResponse.choices == null || textModerationResponse.choices.Count == 0) throw new CustomException("Êú™Ëé∑ÂèñÂà∞ÂÆ°Ê†∏ÁªìÊûúÔºÅ");
+        var msgTextModerationResponseContent = textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>();
+        if ((msgTextModerationResponseContent.PoliticsResultCode != 1 && msgTextModerationResponseContent.PoliticsScore < 50) &&
+            (msgTextModerationResponseContent.AdultResultCode != 1 && msgTextModerationResponseContent.AdultScore < 50))
+            isExamine = true;
+        bool IsAi = false;
+        if ((msgTextModerationResponseContent.AIResultCode == 1 && msgTextModerationResponseContent.AIScore > 50)) IsAi = true;
         ExamineRecordBiz examineRecordBiz = new ExamineRecordBiz();
+
         examineRecordBiz.Add(new ExamineRecord()
         {
             CreatedAt = DateTime.UtcNow,
             WorkCode = work.Code,
-            Result = textModerationResponse.ToJsonString()
+            Result = textModerationResponse.ToJsonString(),
+            DataSHA265 = EncryptionHelper.ComputeSHA256(content),
+            UserName = user.Username,
+            UserCode = user.Code,
+            IsAi = IsAi,
+            IsOk = isExamine
         });
-        var msgTextModerationResponseContent = textModerationResponse.choices[0].message.content.FromJsonString<TextModerationAutoRouteHelper.TextModerationResponseContent>();
-        if (msgTextModerationResponseContent.PoliticsResultCode != 1 && msgTextModerationResponseContent.PoliticsScore > 50 &&
-            msgTextModerationResponseContent.AIResultCode != 1 && msgTextModerationResponseContent.AIScore > 50 &&
-            msgTextModerationResponseContent.AdultResultCode != 1 && msgTextModerationResponseContent.AdultScore < 50)
-            workBiz.ApproveArticleReview(workCode);
 
         dic.Add("status", 200);
-        dic.Add("message", "≥…π¶");
-            dic.Add("data", msgTextModerationResponseContent);
+        dic.Add("message", "ÊàêÂäü");
+        dic.Add("data", msgTextModerationResponseContent);
         return dic;
     }
 
@@ -80,7 +87,7 @@ public class ExamineController(IWebHostEnvironment env) : ControllerBase
         return new Dictionary<string, object>()
         {
             { "status", 200 },
-            { "message", "≥…π¶" },
+            { "message", "ÊàêÂäü" },
             {
                 "data", new Dictionary<string, object>()
                 {

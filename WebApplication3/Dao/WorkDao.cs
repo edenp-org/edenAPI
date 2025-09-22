@@ -1,4 +1,4 @@
-﻿using WebApplication3.Foundation.Helper;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
 namespace WebApplication3.Dao
@@ -74,11 +74,14 @@ namespace WebApplication3.Dao
                 .ExecuteAffrows();
         }
 
-        public void ApproveArticleReview(long workCode)
+        public void ApproveArticleReview(long workCode, int IsExamine ,DateTime ExamineDate,bool IsPublished,bool isScheduledRelease,DateTime ScheduledReleaseTime)
         {
             FreeSqlHelper.Instance.Update<Work>().Where(w => w.Code == workCode)
-                .Set(w => w.IsExamine, 1)
+                .Set(w => w.IsExamine, IsExamine)
                 .Set(w => w.ExamineDate, DateTime.UtcNow)
+                .Set(w => w.IsPublished, IsPublished)
+                .Set(w=> w.IsScheduledRelease, isScheduledRelease)
+                .Set(w => w.ScheduledReleaseTime, ScheduledReleaseTime)
                 .ExecuteAffrows();
         }
 
@@ -89,9 +92,19 @@ namespace WebApplication3.Dao
                 .Set(w => w.Title, title)
                 .Set(w => w.Description, description)
                 .Set(w => w.UpdatedAt, DateTime.UtcNow)
-                .Set(w => w.IsExamine == 1)
+                .Set(w => w.IsExamine, 0)
+                .Set(w => w.IsPublished, false)
+                .Set(w=> w.IsScheduledRelease, false)
                 .ExecuteAffrows();
             return GetWorkByGetWorkCode(workCode);
+        }
+
+        public (List<Work> Data, long Total) GetWorksByUserCode(long uCode, int pageIndex, int pageSize)
+        {
+            var query = FreeSqlHelper.Instance.Select<Work>().Where(w => w.AuthorCode == uCode);
+            var total = query.Count();
+            var data = query.Page(pageIndex, pageSize).ToList();
+            return (data, total);
         }
     }
 }

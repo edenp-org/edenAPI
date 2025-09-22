@@ -10,15 +10,15 @@ public class RedisHelper
     static string RedisPassword = ConfigHelper.GetString("RedisPassword");
     static RedisHelper()
     {
-        // ´ÓÅäÖÃÎÄ¼şÖĞ¶ÁÈ¡ Redis Á¬½ÓĞÅÏ¢
+        // ä»é…ç½®æ–‡ä»¶ä¸­è¯»å– Redis è¿æ¥ä¿¡æ¯
         string redisConnectionString = $"{RedisIP}:{RedisPort},password={RedisPassword},defaultDatabase=0";
 
-        // ³õÊ¼»¯ RedisClient
+        // åˆå§‹åŒ– RedisClient
         _redisClient = new RedisClient(redisConnectionString);
     }
 
     /// <summary>
-    /// ÉèÖÃ¼üÖµ¶Ô
+    /// è®¾ç½®é”®å€¼å¯¹
     /// </summary>
     public static void Set(string key, string value, int expireSeconds = 0)
     {
@@ -33,7 +33,7 @@ public class RedisHelper
     }
 
     /// <summary>
-    /// »ñÈ¡Öµ
+    /// è·å–å€¼
     /// </summary>
     public static string Get(string key)
     {
@@ -41,7 +41,7 @@ public class RedisHelper
     }
 
     /// <summary>
-    /// É¾³ı¼ü
+    /// åˆ é™¤é”®
     /// </summary>
     public static void Remove(string key)
     {
@@ -49,7 +49,7 @@ public class RedisHelper
     }
 
     /// <summary>
-    /// ¼ì²é¼üÊÇ·ñ´æÔÚ
+    /// æ£€æŸ¥é”®æ˜¯å¦å­˜åœ¨
     /// </summary>
     public static bool Exists(string key)
     {
@@ -57,10 +57,18 @@ public class RedisHelper
     }
 
     /// <summary>
-    /// ÉèÖÃ¼üµÄ¹ıÆÚÊ±¼ä
+    /// è®¾ç½®é”®çš„è¿‡æœŸæ—¶é—´
     /// </summary>
     public static void Expire(string key, int expireSeconds)
     {
         _redisClient.Expire(key, expireSeconds);
+    }
+    // ---- æ–°å¢ï¼šè‡ªå¢ä¸è·å– Long ----
+    public static long Incr(string key, long delta = 1) => _redisClient.IncrBy(key, delta);
+
+    public static long GetLong(string key)
+    {
+        var v = _redisClient.Get(key);
+        return long.TryParse(v, out var l) ? l : 0L;
     }
 }

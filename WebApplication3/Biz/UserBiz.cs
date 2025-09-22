@@ -1,4 +1,4 @@
-﻿using WebApplication3.Dao;
+using WebApplication3.Dao;
 using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 
@@ -224,6 +224,18 @@ namespace WebApplication3.Biz
         public void RetrievePassword(long code,string password)
         {
             dao.RetrievePassword(code,password);
+        }
+
+        public List<UserLikeWork> GetUserLikeWorkByUserId(long userCode)
+        {
+            // 调用数据访问对象的方法获取用户喜欢的作品
+            return dao.GetUserLikeWorkByUserId(userCode);
+        }
+
+        public void UpdateUser(User user)
+        {
+            //    调用数据访问对象的方法更新用户信息
+            dao.UpdateUser(user);
         }
     }
 }

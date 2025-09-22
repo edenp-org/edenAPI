@@ -1,3 +1,5 @@
+using System;
+using System.Text;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -11,17 +13,19 @@ public class NLogHelper
     {
         var config = new LoggingConfiguration();
 
-        // ÅäÖÃ¿ØÖÆÌ¨ÈÕÖ¾Êä³ö
+        // é…ç½®æ§åˆ¶å°æ—¥å¿—è¾“å‡º
         var consoleTarget = new ConsoleTarget("console")
         {
-            Layout = "${longdate} ${level:uppercase=true} ${message} ${exception:format=toString,stackTrace}"
+            Layout = "${longdate} ${level:uppercase=true} ${message} ${exception:format=toString,stackTrace}",
+            Encoding = Encoding.UTF8
         };
         config.AddTarget(consoleTarget);
-        config.AddRule(LogLevel.Info, LogLevel.Fatal, consoleTarget);
+        config.AddRule(LogLevel.Debug, LogLevel.Fatal, consoleTarget);
 
-        // ÅäÖÃÎÄ¼şÈÕÖ¾Êä³ö
+        // é…ç½®æ–‡ä»¶æ—¥å¿—è¾“å‡º
         var fileTarget = new FileTarget("file")
         {
+            Encoding = Encoding.UTF8,
             FileName = "${basedir}/logs/logfile.log",
             Layout = "${longdate} ${level:uppercase=true} ${message} ${exception:format=toString,stackTrace}",
             ArchiveEvery = FileArchivePeriod.Day,
@@ -30,7 +34,7 @@ public class NLogHelper
         config.AddTarget(fileTarget);
         config.AddRule(LogLevel.Debug, LogLevel.Fatal, fileTarget);
 
-        // Ó¦ÓÃÅäÖÃ
+        // åº”ç”¨é…ç½®
         LogManager.Configuration = config;
     }
 

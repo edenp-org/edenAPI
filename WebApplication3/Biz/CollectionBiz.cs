@@ -18,11 +18,11 @@ public class CollectionBiz
         long newCode = 0;
         if (maxCode != null && maxCode.Code != 0)
         {
-            newCode = (maxCode.Code + 1); // Éú³ÉĞÂµÄ Code£¬´Ó1¿ªÊ¼µİÔö
+            newCode = (maxCode.Code + 1); // ç”Ÿæˆæ–°çš„ Codeï¼Œä»1å¼€å§‹é€’å¢
         }
         else
         {
-            newCode = 1; // Èç¹ûÃ»ÓĞ±êÇ©£¬³õÊ¼»¯Îª1
+            newCode = 1; // å¦‚æœæ²¡æœ‰æ ‡ç­¾ï¼Œåˆå§‹åŒ–ä¸º1
         }
 
         return newCode;
@@ -50,11 +50,11 @@ public class CollectionBiz
         long newCode = 0;
         if (maxCode != null && maxCode.Code != 0)
         {
-            newCode = (maxCode.Code + 1); // Éú³ÉĞÂµÄ Code£¬´Ó1¿ªÊ¼µİÔö
+            newCode = (maxCode.Code + 1); // ç”Ÿæˆæ–°çš„ Codeï¼Œä»1å¼€å§‹é€’å¢
         }
         else
         {
-            newCode = 1; // Èç¹ûÃ»ÓĞ±êÇ©£¬³õÊ¼»¯Îª1
+            newCode = 1; // å¦‚æœæ²¡æœ‰æ ‡ç­¾ï¼Œåˆå§‹åŒ–ä¸º1
         }
         return newCode;
     }

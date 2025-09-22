@@ -1,10 +1,15 @@
 using FreeSql;
-using Lazy.Captcha.Core.Generator;
 using Lazy.Captcha.Core;
+using Lazy.Captcha.Core.Generator;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication3.Foundation.Helper;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using WebApplication3.Foundation;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Foundation.Middleware;
+using WebApplication3.Middleware;
 
 namespace WebApplication3
 {
@@ -15,7 +20,7 @@ namespace WebApplication3
             var builder = WebApplication.CreateBuilder(args);
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddSession(); // Ìí¼Ó Session ·şÎñ
+            builder.Services.AddSession(); // æ·»åŠ  Session æœåŠ¡
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
@@ -26,40 +31,40 @@ namespace WebApplication3
                             .AllowAnyMethod();
                     });
             });
-            NLogHelper.Debug("ÏµÍ³Æô¶¯ÖĞ....");
+            NLogHelper.Debug("ç³»ç»Ÿå¯åŠ¨ä¸­....");
             builder.Services.AddCaptcha(builder.Configuration, option =>
             {
-                option.CaptchaType = CaptchaType.NUMBER; // ÑéÖ¤ÂëÀàĞÍ
-                option.CodeLength = 4; // ÑéÖ¤Âë³¤¶È, Òª·ÅÔÚCaptchaTypeÉèÖÃºó.  µ±ÀàĞÍÎªËãÊõ±í´ïÊ½Ê±£¬³¤¶È´ú±í²Ù×÷µÄ¸öÊı
-                option.ExpirySeconds = 30 * 60; // ÑéÖ¤Âë¹ıÆÚÊ±¼ä
-                option.IgnoreCase = true; // ±È½ÏÊ±ÊÇ·ñºöÂÔ´óĞ¡Ğ´
-                option.StoreageKeyPrefix = ""; // ´æ´¢¼üÇ°×º
+                option.CaptchaType = CaptchaType.NUMBER; // éªŒè¯ç ç±»å‹
+                option.CodeLength = 4; // éªŒè¯ç é•¿åº¦, è¦æ”¾åœ¨CaptchaTypeè®¾ç½®å.  å½“ç±»å‹ä¸ºç®—æœ¯è¡¨è¾¾å¼æ—¶ï¼Œé•¿åº¦ä»£è¡¨æ“ä½œçš„ä¸ªæ•°
+                option.ExpirySeconds = 30 * 60; // éªŒè¯ç è¿‡æœŸæ—¶é—´
+                option.IgnoreCase = true; // æ¯”è¾ƒæ—¶æ˜¯å¦å¿½ç•¥å¤§å°å†™
+                option.StoreageKeyPrefix = ""; // å­˜å‚¨é”®å‰ç¼€
 
-                option.ImageOption.Animation = false; // ÊÇ·ñÆôÓÃ¶¯»­
-                option.ImageOption.FrameDelay = 30; // Ã¿Ö¡ÑÓ³Ù,Animation=trueÊ±ÓĞĞ§, Ä¬ÈÏ30
+                option.ImageOption.Animation = false; // æ˜¯å¦å¯ç”¨åŠ¨ç”»
+                option.ImageOption.FrameDelay = 30; // æ¯å¸§å»¶è¿Ÿ,Animation=trueæ—¶æœ‰æ•ˆ, é»˜è®¤30
 
-                option.ImageOption.Width = 100; // ÑéÖ¤Âë¿í¶È
-                option.ImageOption.Height = 50; // ÑéÖ¤Âë¸ß¶È
-                option.ImageOption.BackgroundColor = SkiaSharp.SKColors.White; // ÑéÖ¤Âë±³¾°É«
+                option.ImageOption.Width = 100; // éªŒè¯ç å®½åº¦
+                option.ImageOption.Height = 50; // éªŒè¯ç é«˜åº¦
+                option.ImageOption.BackgroundColor = SkiaSharp.SKColors.White; // éªŒè¯ç èƒŒæ™¯è‰²
 
-                option.ImageOption.BubbleCount = 2; // ÆøÅİÊıÁ¿
-                option.ImageOption.BubbleMinRadius = 5; // ÆøÅİ×îĞ¡°ë¾¶
-                option.ImageOption.BubbleMaxRadius = 15; // ÆøÅİ×î´ó°ë¾¶
-                option.ImageOption.BubbleThickness = 1; // ÆøÅİ±ßÑØºñ¶È
+                option.ImageOption.BubbleCount = 2; // æ°”æ³¡æ•°é‡
+                option.ImageOption.BubbleMinRadius = 5; // æ°”æ³¡æœ€å°åŠå¾„
+                option.ImageOption.BubbleMaxRadius = 15; // æ°”æ³¡æœ€å¤§åŠå¾„
+                option.ImageOption.BubbleThickness = 1; // æ°”æ³¡è¾¹æ²¿åšåº¦
 
-                option.ImageOption.InterferenceLineCount = 5; // ¸ÉÈÅÏßÊıÁ¿
+                option.ImageOption.InterferenceLineCount = 5; // å¹²æ‰°çº¿æ•°é‡
 
-                option.ImageOption.FontSize = 36; // ×ÖÌå´óĞ¡
-                option.ImageOption.FontFamily = DefaultFontFamilys.Instance.Actionj; // ×ÖÌå
+                option.ImageOption.FontSize = 36; // å­—ä½“å¤§å°
+                option.ImageOption.FontFamily = DefaultFontFamilys.Instance.Actionj; // å­—ä½“
 
                 /*
-                 * ÖĞÎÄÊ¹ÓÃkaiti£¬ÆäËû×Ö·û¿É¸ù¾İÏ²ºÃÉèÖÃ£¨¿ÉÄÜ²¿·Ö×ª×Ö·û»á³öÏÖ»æÖÆ²»³öµÄÇé¿ö£©¡£
-                 * µ±ÑéÖ¤ÂëÀàĞÍÎª¡°ARITHMETIC¡±Ê±£¬²»ÒªÊ¹ÓÃ¡°Ransom¡±×ÖÌå¡££¨ÔËËã·ûºÍµÈºÅ»æÖÆ²»³öÀ´£©
+                 * ä¸­æ–‡ä½¿ç”¨kaitiï¼Œå…¶ä»–å­—ç¬¦å¯æ ¹æ®å–œå¥½è®¾ç½®ï¼ˆå¯èƒ½éƒ¨åˆ†è½¬å­—ç¬¦ä¼šå‡ºç°ç»˜åˆ¶ä¸å‡ºçš„æƒ…å†µï¼‰ã€‚
+                 * å½“éªŒè¯ç ç±»å‹ä¸ºâ€œARITHMETICâ€æ—¶ï¼Œä¸è¦ä½¿ç”¨â€œRansomâ€å­—ä½“ã€‚ï¼ˆè¿ç®—ç¬¦å’Œç­‰å·ç»˜åˆ¶ä¸å‡ºæ¥ï¼‰
                  */
 
-                option.ImageOption.TextBold = true; // ´ÖÌå£¬¸ÃÅäÖÃ2.0.3ĞÂÔö
+                option.ImageOption.TextBold = true; // ç²—ä½“ï¼Œè¯¥é…ç½®2.0.3æ–°å¢
             });
-            // Ìí¼ÓÒÔÏÂÅäÖÃ
+            // æ·»åŠ ä»¥ä¸‹é…ç½®
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
@@ -68,11 +73,16 @@ namespace WebApplication3
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    // ±£³ÖÓëÔ­Ê¼´úÂëÏàÍ¬µÄJSONÅäÖÃ
+                    // ä¿æŒä¸åŸå§‹ä»£ç ç›¸åŒçš„JSONé…ç½®
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 });
+            builder.Services.AddMemoryCache();
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlerMiddleware>();
+
+
+            app.UseRequestLogging();
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -82,12 +92,15 @@ namespace WebApplication3
             }
 
             app.UseHttpsRedirection();
+            app.UseWorkViewCountRedis();
             app.UseStaticFiles();
 
             app.UseRouting();
 
+
+
             app.UseAuthorization();
-            // Ê¹ÓÃ CORS ÖĞ¼ä¼ş
+            // ä½¿ç”¨ CORS ä¸­é—´ä»¶
             app.UseCors("AllowAll");
 
             app.MapControllerRoute(
