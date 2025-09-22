@@ -1,14 +1,15 @@
 using FreeSql;
-using Lazy.Captcha.Core.Generator;
 using Lazy.Captcha.Core;
+using Lazy.Captcha.Core.Generator;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using WebApplication3.Foundation.Helper;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using WebApplication3.Foundation;
+using WebApplication3.Foundation.Helper;
 using WebApplication3.Foundation.Middleware;
+using WebApplication3.Middleware;
 
 namespace WebApplication3
 {
@@ -75,6 +76,7 @@ namespace WebApplication3
                     // 保持与原始代码相同的JSON配置
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 });
+            builder.Services.AddMemoryCache();
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlerMiddleware>();
 
@@ -90,6 +92,7 @@ namespace WebApplication3
             }
 
             app.UseHttpsRedirection();
+            app.UseWorkViewCountRedis();
             app.UseStaticFiles();
 
             app.UseRouting();

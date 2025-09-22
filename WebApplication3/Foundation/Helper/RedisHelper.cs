@@ -63,4 +63,12 @@ public class RedisHelper
     {
         _redisClient.Expire(key, expireSeconds);
     }
+    // ---- 新增：自增与获取 Long ----
+    public static long Incr(string key, long delta = 1) => _redisClient.IncrBy(key, delta);
+
+    public static long GetLong(string key)
+    {
+        var v = _redisClient.Get(key);
+        return long.TryParse(v, out var l) ? l : 0L;
+    }
 }

@@ -263,12 +263,15 @@ namespace WebApplication3.Controllers
             var work = workBiz.GetWorkByGetWorkCode(workCode);
             if (work == null) throw new CustomException("未查询到数据！");
 
-            // 构造响应数据
+            var viewKey = $"work:view:{work.Code}";
+            var viewCount = RedisHelper.GetLong(viewKey);
+
             dic.Add("status", 200);
             dic.Add("message", "成功");
             dic.Add("data", new {
                 work,
-                url = Path.Combine("Work", work.AuthorCode.ToString(), work.Id.ToString() + ".TXT")
+                viewCount,
+                url = Path.Combine("Work", work.AuthorCode.ToString(), work.Code.ToString() + ".TXT")
             });
             return dic;
         }
