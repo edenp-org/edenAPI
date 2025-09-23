@@ -46,7 +46,7 @@ namespace WebApplication3.Biz
             }
         }
 
-        public List<Work> GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
+        public (List<Work> Data, long Total) GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
         {
             return workDao.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
         }

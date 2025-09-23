@@ -24,18 +24,22 @@ namespace WebApplication3.Dao
                 .First();
         }
 
-        public List<Work> GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
+        public (List<Work> Data, long Total) GetArticlesByUserFavoriteTags(long userCode, int page, int pageSize)
         {
-            return FreeSqlHelper.Instance.Select<Work>()
+            var sql = FreeSqlHelper.Instance.Select<Work>()
                 .Where(w => FreeSqlHelper.Instance.Select<UserFavoriteTag>()
                                 .Where(uf => uf.UserCode == userCode)
                                 .Any(uf => uf.TagCode == w.Code) &&
                             !FreeSqlHelper.Instance.Select<UserDislikedTag>()
                                 .Where(ud => ud.UserCode == userCode)
                                 .Any(ud => ud.TagCode == w.Code))
-                .OrderByDescending(d => d.CreatedAt)
+                .OrderByDescending(d => d.CreatedAt);
+                
+             var list = sql
                 .Page(page, pageSize)
                 .ToList();
+            long count = sql.Count();
+            return (list, count);
         }
 
         public List<Work> GetWorkByCollectionCode(long collectionCode)

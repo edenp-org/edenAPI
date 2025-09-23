@@ -296,13 +296,15 @@ namespace WebApplication3.Controllers
 
             // 获取用户偏好的文章
             var workBiz = new WorkBiz();
-            var workList = workBiz.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
-            if (workList == null) throw new CustomException("未查询到数据！");
+            var work = workBiz.GetArticlesByUserFavoriteTags(userCode, page, pageSize);
+            if (work.Total == 0) throw new CustomException("未查询到数据！");
+            if (work.Data == null) throw new CustomException("未查询到数据！");
 
             // 构造精简响应数据
             dic.Add("status", 200);
             dic.Add("message", "成功");
-            dic.Add("data", workList.Select(a => new
+            dic.Add("Total", work.Total);
+            dic.Add("data", work.Data.Select(a => new
             {
                 a.Code,
                 a.Tags,
