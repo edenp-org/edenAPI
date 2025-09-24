@@ -2,10 +2,12 @@ using FreeSql;
 using Lazy.Captcha.Core;
 using Lazy.Captcha.Core.Generator;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using System.Net;
 using WebApplication3.Foundation;
 using WebApplication3.Foundation.Helper;
 using WebApplication3.Foundation.Middleware;
@@ -32,6 +34,26 @@ namespace WebApplication3
                     });
             });
             NLogHelper.Debug("系统启动中....");
+
+            // 配置转发头：不限制层数，但只信任你的代理来源（请根据实际网段/IP填写）
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.ForwardLimit = null; // 不限制代理层数
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+                options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("0.0.0.0"), 0)); // 全部 IPv4
+                options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("::"), 0));      // 全部 IPv6
+
+                // 强烈建议：配置你基础设施内的代理网段/IP（示例，按需修改/追加）
+                // options.KnownProxies.Add(IPAddress.Parse("203.0.113.10"));
+                // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
+                // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
+                // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("192.168.0.0"), 16));
+
+                // 如果无法枚举代理来源，请勿清空 KnownProxies/Networks 并信任所有来源，这将非常不安全。
+            });
+
             builder.Services.AddCaptcha(builder.Configuration, option =>
             {
                 option.CaptchaType = CaptchaType.NUMBER; // 验证码类型
@@ -91,16 +113,17 @@ namespace WebApplication3
                 app.UseHsts();
             }
 
+            // 注意顺序：先处理转发头，后续中间件才能拿到真实 IP 和协议
+            app.UseForwardedHeaders();
+
             app.UseHttpsRedirection();
+
+            // 你的中间件此时使用 context.Connection.RemoteIpAddress 即为真实客户端 IP
             app.UseWorkViewCountRedis();
+
             app.UseStaticFiles();
-
             app.UseRouting();
-
-
-
             app.UseAuthorization();
-            // 使用 CORS 中间件
             app.UseCors("AllowAll");
 
             app.MapControllerRoute(
