@@ -44,14 +44,6 @@ namespace WebApplication3
                 options.KnownProxies.Clear();
                 options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("0.0.0.0"), 0)); // 全部 IPv4
                 options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("::"), 0));      // 全部 IPv6
-
-                // 强烈建议：配置你基础设施内的代理网段/IP（示例，按需修改/追加）
-                // options.KnownProxies.Add(IPAddress.Parse("203.0.113.10"));
-                // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
-                // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
-                // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("192.168.0.0"), 16));
-
-                // 如果无法枚举代理来源，请勿清空 KnownProxies/Networks 并信任所有来源，这将非常不安全。
             });
 
             builder.Services.AddCaptcha(builder.Configuration, option =>
@@ -86,14 +78,12 @@ namespace WebApplication3
 
                 option.ImageOption.TextBold = true; // 粗体，该配置2.0.3新增
             });
-            // 添加以下配置
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            builder.Services.AddControllers()
-                .AddJsonOptions(options =>
+            builder.Services.AddControllers().AddJsonOptions(options =>
                 {
                     // 保持与原始代码相同的JSON配置
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -101,10 +91,7 @@ namespace WebApplication3
             builder.Services.AddMemoryCache();
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlerMiddleware>();
-
-
             app.UseRequestLogging();
-
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -117,8 +104,6 @@ namespace WebApplication3
             app.UseForwardedHeaders();
 
             app.UseHttpsRedirection();
-
-            // 你的中间件此时使用 context.Connection.RemoteIpAddress 即为真实客户端 IP
             app.UseWorkViewCountRedis();
 
             app.UseStaticFiles();

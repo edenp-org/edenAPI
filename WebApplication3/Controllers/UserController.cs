@@ -10,6 +10,7 @@ using WebApplication3.Foundation.Helper;
 using WebApplication3.Models.DB;
 using WebApplication3.Sundry;
 using WebApplication3.Controllers.Requests;
+using TouchSocket.Core;
 
 namespace WebApplication3.Controllers
 {
@@ -544,6 +545,7 @@ namespace WebApplication3.Controllers
             return dic;
         }
 
+
         /// <summary>
         /// 分页获取指定用户作品列表。
         /// </summary>
@@ -564,6 +566,34 @@ namespace WebApplication3.Controllers
             var workBiz = new WorkBiz();
             var works = workBiz.GetWorksByUserCode(uCode, pageIndex, pageSize);
 
+            // 统一作者信息（该列表作者相同）
+            var author = new
+            {
+                user.Code,
+                user.Username,
+                avatarUrl = $"/avatars/{user.Code}/avatar.png",
+                user.Ao3Url,
+                user.XUrl,
+                user.WeiboUrl,
+                user.LofterUrl,
+                user.Gender,
+                user.Profile
+            };
+
+            // 在每条作品里内联作者信息
+            var worksWithAuthor = works.Data.Select(w => new
+            {
+                w.Code,
+                w.Title,
+                w.Description,
+                w.CreatedAt,
+                w.UpdatedAt,
+                w.AuthorCode,
+                w.AuthorName,
+                w.Tags,
+                author
+            }).ToList();
+
             dic.Add("status", 200);
             dic.Add("message", "成功");
             dic.Add("data", new
@@ -571,7 +601,7 @@ namespace WebApplication3.Controllers
                 total = works.Total,
                 pageIndex,
                 pageSize,
-                works = works.Data
+                works = worksWithAuthor
             });
             return dic;
         }
