@@ -25,38 +25,64 @@ namespace WebApplication3.Middleware
             var requestBody = await ReadRequestBodyAsync(context.Request);
 
             var originalBody = context.Response.Body;
-            await using var mem = new MemoryStream();
+            var mem = new MemoryStream();
             context.Response.Body = mem;
 
-            await _next(context);
-
-            var responseBody = await ReadResponseBodyAsync(mem);
-            sw.Stop();
-
-            var log = new RequestLog
-            {
-                RequestId = requestId,
-                Path = context.Request.Path,
-                Method = context.Request.Method,
-                QueryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value ?? "" : "",
-                RequestBody = Truncate(requestBody),
-                ResponseBody = Truncate(responseBody),
-                StatusCode = context.Response.StatusCode,
-                ElapsedMs = sw.ElapsedMilliseconds
-            };
+            Exception? pipelineException = null;
+            string responseBody = string.Empty;
 
             try
             {
-                await LoggingFreeSqlHelper.Instance.Insert(log).ExecuteAffrowsAsync();
+                await _next(context);
+                // normal path: capture response body for logging
+                responseBody = await ReadResponseBodyAsync(mem);
+                mem.Position = 0;
+                await mem.CopyToAsync(originalBody);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("写请求日志(SQLite)失败: " + ex.Message);
+                // exception path: read whatever was written so far, but DO NOT copy to response
+                pipelineException = ex;
+                try
+                {
+                    mem.Position = 0;
+                    responseBody = await ReadResponseBodyAsync(mem);
+                }
+                catch
+                {
+                    // ignore logging read errors
+                }
+                throw;
             }
+            finally
+            {
+                sw.Stop();
 
-            mem.Position = 0;
-            await mem.CopyToAsync(originalBody);
-            context.Response.Body = originalBody;
+                var log = new RequestLog
+                {
+                    RequestId = requestId,
+                    Path = context.Request.Path,
+                    Method = context.Request.Method,
+                    QueryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value ?? string.Empty : string.Empty,
+                    RequestBody = Truncate(requestBody),
+                    ResponseBody = Truncate(responseBody),
+                    StatusCode = context.Response.StatusCode,
+                    ElapsedMs = sw.ElapsedMilliseconds
+                };
+
+                try
+                {
+                    await LoggingFreeSqlHelper.Instance.Insert(log).ExecuteAffrowsAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("写请求日志(SQLite)失败: " + ex.Message);
+                }
+
+                // Always restore the original body stream so upstream middleware can write (e.g., exception handler)
+                context.Response.Body = originalBody;
+                await mem.DisposeAsync();
+            }
         }
 
         private static async Task<string> ReadRequestBodyAsync(HttpRequest request)

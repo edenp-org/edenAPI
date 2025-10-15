@@ -35,8 +35,9 @@ public class ExceptionHandlerMiddleware(RequestDelegate next)
         }
         else if(exception is AuthenticationException authenticationException)
         {
-            result.Add("status", 400);
-            result.Add("message", authenticationException.Message);
+            result.Add("status", 401);
+            //result.Add("message", authenticationException.Message);
+            result.Add("message", "Token 已过期或无效");
             context.Response.StatusCode = 401;
         }
         else

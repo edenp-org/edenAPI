@@ -79,9 +79,7 @@ namespace WebApplication3.Controllers
             var userBiz = new UserBiz();
             var userTokenBiz = new UserTokenBiz();
 
-            var user = !string.IsNullOrEmpty(request.data.Email)
-                ? userBiz.GetUserByEmail(request.data.Email)
-                : userBiz.GetUserByUname(request.data.Uname);
+            var user = !string.IsNullOrEmpty(request.data.Email) ? userBiz.GetUserByEmail(request.data.Email) : userBiz.GetUserByUname(request.data.Uname);
             if (user == null) throw new CustomException("用户名或邮箱或密码不存在！");
 
             if (!user.Password.Equals(EncryptionHelper.ComputeSHA256(request.data.Password + user.Confuse)))
@@ -94,13 +92,21 @@ namespace WebApplication3.Controllers
             var refreshToken = TokenService.GenerateToken(user.Username, user.Role.ToString(), "refreshToken", user.Code, refreshTokenExpires);
             var accessToken = TokenService.GenerateToken(user.Username, user.Role.ToString(), "accessToken", user.Code, accessTokenExpires);
 
+            var userDir = Path.Combine("wwwroot", "avatars", user.Code.ToJsonString());
+            if (!Directory.Exists(userDir))
+            {
+                Directory.CreateDirectory(userDir);
+                System.IO.File.Copy(Path.Combine("wwwroot", "Default", "Img", "default.png"), Path.Combine(userDir, "avatar.png"));
+            }
+
+
             userTokenBiz.Add(new UserToken
             {
                 Expiration = refreshTokenExpires,
                 CreatedAt = DateTime.UtcNow,
                 Purpose = "refreshToken",
                 Token = refreshToken,
-                Username = user.Username
+                Username = user.Username,
             });
 
             var accessTokenExpiresTimeSeconds = accessTokenExpires.ToUnixTimeSeconds();
@@ -116,7 +122,10 @@ namespace WebApplication3.Controllers
 
             dic.Add("status", 200);
             dic.Add("message", "登录成功！");
-            dic.Add("data", accessToken);
+            dic.Add("data",new { 
+                accessToken,
+                UCode = user.Code
+            });
             return dic;
         }
 
@@ -278,6 +287,13 @@ namespace WebApplication3.Controllers
                     Confuse = confuse,
                     Role = 2
                 });
+
+                var userDir = Path.Combine("wwwroot", "avatars", newCodeUser.ToJsonString());
+                if (!Directory.Exists(userDir)) 
+                {
+                    Directory.CreateDirectory(userDir);
+                    System.IO.File.Copy(Path.Combine("wwwroot", "Default", "Img", "default.png"), Path.Combine(userDir, "avatar.png"));
+                }
             }
 
             dic.Add("status", 200);
